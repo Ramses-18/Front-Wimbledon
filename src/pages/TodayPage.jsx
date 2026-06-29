@@ -6,7 +6,7 @@ function DeadlineBanner({ matches }) {
   if (!matches.length) return null
   const first    = matches[0]
   const deadline = new Date(`${first.matchDate}T${first.matchTime}`)
-  deadline.setMinutes(deadline.getMinutes() - 30)
+  deadline.setMinutes(deadline.getMinutes() - 1)
   const closed = new Date() > deadline
   const fmt    = deadline.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
 

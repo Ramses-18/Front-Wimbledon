@@ -97,7 +97,7 @@ export default function AuthPage() {
 
         {tab === 'login' && (
           <p style={{ marginTop: 16, textAlign: 'center', fontSize: 12, color: '#888' }}>
-            Demo admin: admin@wimbledon.com / admin1234
+            Admin: admin@wimbledon.com / admin1234
           </p>
         )}
       </div>
