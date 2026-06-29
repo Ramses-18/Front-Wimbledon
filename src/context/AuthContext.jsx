@@ -3,13 +3,11 @@ import axios from 'axios'
 
 const AuthContext = createContext(null)
 
-// ── Axios instance ─────────────────────────────────────────────────────
-// En Vercel tomará la URL de producción; en tu PC usará '' para activar el proxy de Vite
-const API_URL = import.meta.env.VITE_API_URL || '';
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api'
 
-export const api = axios.create({ 
-  baseURL: API_URL 
-})
+export const api = axios.create({ baseURL: BASE_URL })
 
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('wim_token')
@@ -65,3 +63,4 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => useContext(AuthContext)
+
