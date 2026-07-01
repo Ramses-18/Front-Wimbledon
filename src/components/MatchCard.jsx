@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { api } from '../context/AuthContext.jsx'
 import { useToast } from '../context/ToastContext.jsx'
+import { Route } from 'react-router-dom';
 
 const G = '#1B5E20'
 const GM = '#2E7D32'
@@ -144,8 +145,7 @@ export default function MatchCard({ match, onRefresh }) {
           {match.court || 'Wimbledon'}
         </span>
         {match.round && (
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,.6)' }}>{match.round} round</span>
-          //<span style={{ fontSize: 11, color: 'rgba(255,255,255,.6)' }}>{match.round} + {round} </span>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,.6)' }}>{match.round} Round</span>
         )}
       </div>
 
