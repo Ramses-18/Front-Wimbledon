@@ -16,10 +16,9 @@ function DeadlineBanner({ matches }) {
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       marginBottom: 16,
     }}>
-      <div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,.65)' }}>Cierre de pronósticos</div>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'white' }}>{fmt} hs</div>
-      </div>
+      
+      
+
       <span style={{
         fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20,
         background: closed ? '#FFCDD2' : '#C8E6C9',
