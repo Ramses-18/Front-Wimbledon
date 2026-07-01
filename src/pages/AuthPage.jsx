@@ -96,12 +96,12 @@ export default function AuthPage() {
         </button>
 
         {tab === 'login' 
-        //&& 
-        //(
-        //  <p style={{ marginTop: 16, textAlign: 'center', fontSize: 12, color: '#888' }}>
-        //    Admin: admin@wimbledon.com / admin1234
-        //  </p>
-        //)
+        && 
+        (
+          <p style={{ marginTop: 16, textAlign: 'center', fontSize: 12, color: '#888' }}>
+            Bienvenido a Wimbledon 2026. Si no tenés cuenta, hacé click en "Registrarse" para crear una.
+          </p>
+        )
         }
       </div>
     </div>
