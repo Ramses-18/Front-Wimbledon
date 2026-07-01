@@ -95,11 +95,14 @@ export default function AuthPage() {
           {loading ? 'Procesando...' : tab === 'login' ? 'Ingresar' : 'Crear cuenta'}
         </button>
 
-        {tab === 'login' && (
-          <p style={{ marginTop: 16, textAlign: 'center', fontSize: 12, color: '#888' }}>
-            Admin: admin@wimbledon.com / admin1234
-          </p>
-        )}
+        {tab === 'login' 
+        //&& 
+        //(
+        //  <p style={{ marginTop: 16, textAlign: 'center', fontSize: 12, color: '#888' }}>
+        //    Admin: admin@wimbledon.com / admin1234
+        //  </p>
+        //)
+        }
       </div>
     </div>
   )
