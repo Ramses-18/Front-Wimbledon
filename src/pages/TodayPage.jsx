@@ -16,8 +16,6 @@ function DeadlineBanner({ matches }) {
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       marginBottom: 16,
     }}>
-      
-      
 
       <span style={{
         fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20,
