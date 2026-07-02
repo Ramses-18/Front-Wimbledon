@@ -1,7 +1,9 @@
+////////////////////////////////
+
+
 import React, { useState } from 'react'
 import { api } from '../context/AuthContext.jsx'
 import { useToast } from '../context/ToastContext.jsx'
-import { Route } from 'react-router-dom';
 
 const G = '#1B5E20'
 const GM = '#2E7D32'
@@ -22,6 +24,7 @@ export default function MatchCard({ match, onRefresh }) {
     sets: [emptySet(), emptySet(), emptySet(), emptySet(), emptySet()],
   })
 
+  // Cierre 5 minutos antes de cada partido
   const deadline = (() => {
     const d = new Date(`${match.matchDate}T${match.matchTime}`)
     d.setMinutes(d.getMinutes() - 5)
@@ -60,6 +63,20 @@ export default function MatchCard({ match, onRefresh }) {
     return cnt > 0 ? cnt : null
   }
 
+
+  const countSetsLoser = () => {
+    let cnt = 0
+    form.sets.forEach(s => {
+      if (s.w !== '' && s.l !== '') {
+        const w = parseInt(s.w), l = parseInt(s.l)
+        if (!isNaN(w) && !isNaN(l) && l > w) cnt++
+      }
+    })
+    return cnt > 0 ? cnt : null
+  }
+
+
+
   const submit = async (useCorrection = false) => {
     if (!form.winner) { show('Elegí un ganador.', 'error'); return }
     setBusy(true)
@@ -67,6 +84,7 @@ export default function MatchCard({ match, onRefresh }) {
       const payload = {
         winner: form.winner,
         setsWinner: countSetsWinner(),
+        setsLoser: countSetsLoser(),
         gamesWinner: null,
         gamesLoser: null,
         useCorrection,
@@ -145,7 +163,7 @@ export default function MatchCard({ match, onRefresh }) {
           {match.court || 'Wimbledon'}
         </span>
         {match.round && (
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,.6)' }}>{match.round} Round</span>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,.6)' }}>{match.round}</span>
         )}
       </div>
 
