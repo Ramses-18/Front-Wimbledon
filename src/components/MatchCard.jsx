@@ -314,7 +314,7 @@ export default function MatchCard({ match, status, onRefresh }) {
             {match.court || 'Wimbledon'}
           </span>
           {match.round && (
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,.5)' }}>{match.round}</span>
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,.5)' }}>{match.round  || 'Round'}</span>
           )}
         </div>
 
