@@ -237,7 +237,7 @@ export default function AdminPage() {
   const [liveModal, setLiveModal] = useState(null)         // match para LiveScoreModal
   const [tResult, setTResult] = useState({ champion: '', semis: ['','','',''] })
   const [newMatch, setNewMatch] = useState({
-    matchDate: new Date().toISOString().slice(0,10),
+    matchDate: new Date().toLocaleDateString('en-CA'),  // YYYY-MM-DD en zona local
     matchTime: '',
     court: 'Centre Court',
     player1: '',   // texto libre
