@@ -256,13 +256,19 @@ export default function AdminPage() {
 
   const load = async () => {
     try {
+      console.log('[AdminPage] cargando partidos y tournament result...')
       const [m, tr] = await Promise.all([
         api.get('/matches/today'),
         api.get('/tournament/result'),
       ])
+      console.log('[AdminPage] ✓ matches recibidos:', m.data.length, m.data)
+      console.log('[AdminPage] ✓ tournament result:', tr.data)
       setMatches(m.data)
       setTResult(tr.data)
-    } catch (e) { console.error(e) }
+    } catch (e) {
+      console.error('[AdminPage] ✗ error cargando:', e.response?.status, e.response?.data || e.message)
+      show(`Error cargando partidos: ${e.response?.status || ''} ${e.response?.data?.error || e.message}`, 'error')
+    }
   }
   useEffect(() => { load() }, [])
   useEffect(() => { loadBracket() }, [])
