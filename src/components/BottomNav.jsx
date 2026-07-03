@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 const TABS = [
   { path: '/',       icon: '📋', label: 'Hoy' },
+  { path: '/bracket',icon: '🏆', label: 'Bracket' },
   { path: '/tabla',  icon: '🏅', label: 'Tabla' },
-  { path: '/torneo', icon: '🏆', label: 'Torneo' },
+  { path: '/torneo', icon: '🎯', label: 'Torneo' },
 ]
 const ADMIN_TAB = { path: '/admin', icon: '⚙️', label: 'Admin' }
 
@@ -19,7 +20,7 @@ export default function BottomNav() {
     <nav style={{
       position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
       width: '100%', maxWidth: 430,
-      background: 'white', borderTop: '1px solid #E0E0D8',
+      background: 'var(--card-bg)', borderTop: '1px solid var(--border)',
       display: 'flex', zIndex: 100,
     }}>
       {tabs.map(t => {
@@ -29,7 +30,7 @@ export default function BottomNav() {
             flex: 1, padding: '10px 4px 8px', border: 'none', background: 'none',
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
             alignItems: 'center', gap: 3,
-            color: active ? '#1B5E20' : '#888888',
+            color: active ? 'var(--green)' : 'var(--text-muted)',
             fontSize: 10, fontWeight: active ? 700 : 500,
           }}>
             <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>

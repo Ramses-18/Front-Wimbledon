@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../context/AuthContext.jsx'
 
-const G = '#1B5E20'
-const BORDER = '#E0E0D8'
+const G = 'var(--green)'
+const BORDER = 'var(--border)'
 
 export default function TablaPage() {
   const navigate = useNavigate()
@@ -44,19 +44,19 @@ export default function TablaPage() {
   const fmt = (n) => n ?? 0
 
   const rankColors = (i) => {
-    if (i === 0) return { background: '#C9A84C', color: 'white' }       // 1° dorado
+    if (i === 0) return { background: 'var(--gold)', color: 'white' }       // 1° dorado
     if (i === 1) return { background: '#9E9E9E', color: 'white' }       // 2° plata
     if (i === 2) return { background: '#A1887F', color: 'white' }       // 3° bronce
-    return { background: '#E0E0D8', color: '#444' }
+    return { background: 'var(--border)', color: 'var(--text-mid)' }
   }
 
   return (
     <div style={{ padding: 16 }}>
       <h1 style={{
         fontFamily: 'Georgia,serif', fontSize: 22, fontWeight: 700,
-        marginBottom: 2, color: '#1A1A1A',
+        marginBottom: 2, color: 'var(--text)',
       }}>Tabla de Posiciones</h1>
-      <p style={{ fontSize: 12, color: '#888', marginBottom: 16 }}>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
         Puntos acumulados Wimbledon 2026
       </p>
 
@@ -72,7 +72,7 @@ export default function TablaPage() {
       {!loading && lb.length > 0 && (
         <>
           <div style={{
-            background: 'white', border: `1px solid ${BORDER}`,
+            background: 'var(--card-bg)', border: `1px solid ${BORDER}`,
             borderRadius: 12, overflow: 'hidden', marginBottom: 16,
           }}>
             {lb.map((u, i) => {
@@ -86,10 +86,10 @@ export default function TablaPage() {
                     display: 'flex', alignItems: 'center',
                     padding: '14px 16px', gap: 14, cursor: 'pointer',
                     borderBottom: i < lb.length - 1 ? '1px solid #F0F0F0' : 'none',
-                    background: isMe ? '#F1F8F1' : 'white',
+                    background: isMe ? 'var(--green-pale)' : 'white',
                     transition: 'background .15s',
                   }}
-                  onMouseEnter={e => { if (!isMe) e.currentTarget.style.background = '#F8F8F5' }}
+                  onMouseEnter={e => { if (!isMe) e.currentTarget.style.background = 'var(--green-pale)' }}
                   onMouseLeave={e => { if (!isMe) e.currentTarget.style.background = 'white' }}
                 >
                   <div style={{
@@ -100,7 +100,7 @@ export default function TablaPage() {
                   }}>{i + 1}</div>
 
                   <div style={{
-                    flex: 1, fontSize: 15, fontWeight: 600, color: '#1A1A1A',
+                    flex: 1, fontSize: 15, fontWeight: 600, color: 'var(--text)',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
                     {u.name}
@@ -112,10 +112,10 @@ export default function TablaPage() {
                     fontFeatureSettings: '"tnum"',
                   }}>
                     {fmt(u.totalPoints)}
-                    <span style={{ fontSize: 10, fontWeight: 500, color: '#888', marginLeft: 3 }}>pts</span>
+                    <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--text-muted)', marginLeft: 3 }}>pts</span>
                   </div>
 
-                  <div style={{ color: '#C0C0B8', fontSize: 14, marginLeft: 4 }}>›</div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: 14, marginLeft: 4 }}>›</div>
                 </div>
               )
             })}
@@ -127,7 +127,7 @@ export default function TablaPage() {
               <button
                 onClick={() => navigate(`/historial/${currentUserId}`)}
                 style={{
-                  background: 'white', border: `1px solid ${G}`, color: G,
+                  background: 'var(--card-bg)', border: `1px solid ${G}`, color: G,
                   fontSize: 12, fontWeight: 600, padding: '10px 16px',
                   borderRadius: 8, cursor: 'pointer',
                   display: 'inline-flex', alignItems: 'center', gap: 6,

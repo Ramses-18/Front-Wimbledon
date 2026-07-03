@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { api } from '../context/AuthContext.jsx'
 import { useToast } from '../context/ToastContext.jsx'
 
-const G = '#1B5E20'
-const COURTS = ['Centre Court','Court 1','Court 2','Court 3']
+const G = 'var(--green)'
+const COURTS = ['Centre Court','Court 1','Court 2','Court 3','Court 4','Court 5','Court 6','Court 7','Court 8','Court 9','Court 10','Court 11','Court 12','Court 13','Court 14','Court 15','Court 16','Court 17','Court 18','Court 19','Court 20']
 const ROUNDS = ['R128','R64','R32','R16','QF','SF','F']
 
 // Modal para cargar resultado FINAL (con ganador + sets)
@@ -86,9 +86,9 @@ function ResultModal({ match, onClose, onSaved }) {
           {[match.player1, match.player2].map(p => (
             <button key={p} onClick={() => setForm(f => ({ ...f, winner: p }))} style={{
               flex: 1, padding: '10px 6px', borderRadius: 8, cursor: 'pointer',
-              border: `1px solid ${form.winner === p ? G : '#E0E0D8'}`,
-              background: form.winner === p ? G : 'white',
-              color: form.winner === p ? 'white' : '#1A1A1A',
+              border: `1px solid ${form.winner === p ? G : 'var(--border)'}`,
+              background: form.winner === p ? G : 'var(--card-bg)',
+              color: form.winner === p ? 'white' : 'var(--text)',
               fontSize: 13, fontWeight: 600,
             }}>
               {p}
@@ -124,9 +124,9 @@ function ResultModal({ match, onClose, onSaved }) {
                     style={{
                       height: 32, borderRadius: 5, textAlign: 'center',
                       fontSize: 13, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
-                      border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : '#E0E0D8'}`,
-                      background: s[side] !== '' && side === 'w' ? '#E8F5E9' : '#FAFAF7',
-                      color: s[side] !== '' ? (side === 'w' ? G : '#444') : '#ccc',
+                      border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : 'var(--border)'}`,
+                      background: s[side] !== '' && side === 'w' ? 'var(--green-light)' : 'var(--cream)',
+                      color: s[side] !== '' ? (side === 'w' ? G : 'var(--text-mid)') : 'var(--text-muted)',
                     }}
                   />
                 ))}
@@ -213,9 +213,9 @@ function LiveScoreModal({ match, onClose, onSaved }) {
                 style={{
                   height: 32, borderRadius: 5, textAlign: 'center',
                   fontSize: 13, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
-                  border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : '#E0E0D8'}`,
-                  background: s[side] !== '' && side === 'w' ? '#E8F5E9' : '#FAFAF7',
-                  color: s[side] !== '' ? (side === 'w' ? G : '#444') : '#ccc',
+                  border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : 'var(--border)'}`,
+                  background: s[side] !== '' && side === 'w' ? 'var(--green-light)' : 'var(--cream)',
+                  color: s[side] !== '' ? (side === 'w' ? G : 'var(--text-mid)') : 'var(--text-muted)',
                 }}
               />
             ))}
@@ -247,6 +247,12 @@ export default function AdminPage() {
   })
   const [savingT, setSavingT] = useState(false)
   const [syncing, setSyncing] = useState(null)
+  // Bracket management
+  const [bracket, setBracket] = useState(null)
+  const [bracketLoading, setBracketLoading] = useState(true)
+  const [bracketError, setBracketError] = useState('')
+  const [bracketRound, setBracketRound] = useState('QF')
+  const [bracketModal, setBracketModal] = useState(null)
 
   const load = async () => {
     try {
@@ -259,6 +265,31 @@ export default function AdminPage() {
     } catch (e) { console.error(e) }
   }
   useEffect(() => { load() }, [])
+  useEffect(() => { loadBracket() }, [])
+
+  const loadBracket = async () => {
+    setBracketLoading(true)
+    try {
+      const { data } = await api.get('/bracket')
+      setBracket(data)
+      setBracketError('')
+    } catch (e) {
+      setBracketError('Bracket no inicializado. Hacé click abajo para crear la estructura.')
+    } finally {
+      setBracketLoading(false)
+    }
+  }
+
+  const initBracket = async () => {
+    if (!confirm('¿Inicializar el bracket? Esto crea 255 partidos vacíos (R128 → F). Solo se hace una vez.')) return
+    try {
+      await api.post('/bracket/init')
+      show('Bracket inicializado ✓')
+      loadBracket()
+    } catch (e) {
+      show(e.response?.data?.error || 'Error al inicializar', 'error')
+    }
+  }
 
   const addMatch = async () => {
     if (!newMatch.player1.trim() || !newMatch.player2.trim()) {
@@ -332,7 +363,7 @@ export default function AdminPage() {
   const courtMatchesForFollows = matches.filter(m => m.court === newMatch.court)
 
   const STATUS_COLORS = {
-    'SCHEDULED': '#888', 'IN_PLAY': '#C62828', 'SUSPENDED': '#FF9800',
+    'SCHEDULED': 'var(--text-muted)', 'IN_PLAY': 'var(--danger)', 'SUSPENDED': '#FF9800',
     'FINISHED': G, 'WALKOVER': '#9C27B0', 'RETIRED': '#9C27B0', 'ABANDONED': '#795548',
   }
 
@@ -343,7 +374,7 @@ export default function AdminPage() {
 
       {/* Sync */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <button className="btn btn-primary" style={{ flex: 1, background: syncing === 'live' ? '#ccc' : '#2E7D32' }}
+        <button className="btn btn-primary" style={{ flex: 1, background: syncing === 'live' ? 'var(--text-muted)' : 'var(--green-mid)' }}
           onClick={syncLive} disabled={syncing !== null}>
           {syncing === 'live' ? 'Sincronizando...' : '🔴 Sync live'}
         </button>
@@ -415,7 +446,7 @@ export default function AdminPage() {
         {matches.map((m, i) => (
           <div key={m.id} style={{
             padding: '11px 14px',
-            borderBottom: i < matches.length - 1 ? '1px solid #E0E0D8' : 'none',
+            borderBottom: i < matches.length - 1 ? '1px solid var(--border)' : 'none',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{
@@ -425,7 +456,7 @@ export default function AdminPage() {
                 {m.status || 'SCHEDULED'}
               </span>
               {m.orderInCourt && <span style={{ fontSize: 10, color: '#888' }}>#{m.orderInCourt} · {m.court}</span>}
-              {m.deadlineForced && <span style={{ fontSize: 10, color: '#C62828' }}>🔒 forzado</span>}
+              {m.deadlineForced && <span style={{ fontSize: 10, color: 'var(--danger)' }}>🔒 forzado</span>}
               {m.result && <span style={{ fontSize: 10, color: G, fontWeight: 700 }}>· ✓ score</span>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -436,26 +467,26 @@ export default function AdminPage() {
                 </div>
               </div>
               <button onClick={() => setModal(m)} style={{
-                background: m.result ? '#E8F5E9' : 'white',
-                border: `1px solid ${m.result ? '#C8E6C9' : '#E0E0D8'}`,
+                background: m.result ? 'var(--green-light)' : 'var(--card-bg)',
+                border: `1px solid ${m.result ? 'var(--green-mid)' : 'var(--border)'}`,
                 borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 600,
-                cursor: 'pointer', color: m.result ? G : '#444',
+                cursor: 'pointer', color: m.result ? G : 'var(--text-mid)',
               }}>
                 {m.result ? '✓' : 'Final'}
               </button>
               <button onClick={() => deleteMatch(m.id)} style={{
-                background: '#FFEBEE', border: '1px solid #FFCDD2', borderRadius: 8,
-                padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#C62828',
+                background: 'var(--danger-bg)', border: '1px solid var(--danger)', borderRadius: 8,
+                padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--danger)',
               }}>✕</button>
             </div>
 
             {/* Acciones según status */}
             {m.status === 'SCHEDULED' && (
               <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
-                <button onClick={() => forceStart(m.id)} style={statusBtnStyle('#C62828')}>
+                <button onClick={() => forceStart(m.id)} style={statusBtnStyle('var(--danger)')}>
                   🔒 Cerrar y empezar
                 </button>
-                <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('#2E7D32')}>
+                <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('var(--green-mid)')}>
                   ▶ Solo iniciar
                 </button>
               </div>
@@ -475,7 +506,7 @@ export default function AdminPage() {
             )}
             {m.status === 'SUSPENDED' && (
               <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
-                <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('#C62828')}>
+                <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('var(--danger)')}>
                   ▶ Reanudar
                 </button>
                 <button onClick={() => setModal(m)} style={statusBtnStyle(G)}>✓ Finalizar</button>
@@ -483,6 +514,68 @@ export default function AdminPage() {
             )}
           </div>
         ))}
+      </div>
+
+      {/* Bracket management */}
+      <h3 style={{ marginBottom: 10, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+        Bracket del torneo
+      </h3>
+      <div className="card" style={{ marginBottom: 16 }}>
+        {bracketLoading ? (
+          <div className="spinner" />
+        ) : bracketError ? (
+          <>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>{bracketError}</p>
+            <button className="btn btn-primary btn-full" onClick={initBracket}>
+              🔧 Inicializar bracket
+            </button>
+          </>
+        ) : (
+          <>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
+              Elegí una ronda para editar los partidos. Cuando seteás un ganador, se propaga automáticamente al partido siguiente.
+            </p>
+            {/* Selector de ronda */}
+            <div style={{ display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', paddingBottom: 4 }}>
+              {(bracket?.rounds || []).map(r => (
+                <button key={r.key} onClick={() => setBracketRound(r.key)} style={{
+                  padding: '6px 10px', fontSize: 10, fontWeight: 600, borderRadius: 5,
+                  border: `1px solid ${bracketRound === r.key ? G : 'var(--border)'}`,
+                  background: bracketRound === r.key ? G : 'var(--card-bg)',
+                  color: bracketRound === r.key ? 'white' : 'var(--text-muted)',
+                  cursor: 'pointer', whiteSpace: 'nowrap',
+                }}>{r.key}</button>
+              ))}
+            </div>
+            {/* Lista de partidos de la ronda seleccionada */}
+            <div style={{ maxHeight: 400, overflowY: 'auto' }}>
+              {(bracket?.matches || []).filter(m => m.round === bracketRound).map(m => (
+                <div key={m.id} style={{
+                  padding: '8px 10px', marginBottom: 6, borderRadius: 6,
+                  border: '1px solid var(--border)', background: 'var(--card-bg)',
+                  cursor: 'pointer',
+                }} onClick={() => setBracketModal(m)}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: m.winner === m.player1 ? G : 'var(--text)' }}>
+                        {m.winner === m.player1 ? '✓ ' : ''}{m.player1 || '—'}
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: m.winner === m.player2 ? G : 'var(--text)' }}>
+                        {m.winner === m.player2 ? '✓ ' : ''}{m.player2 || '—'}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>#{m.positionInRound}</span>
+                  </div>
+                </div>
+              ))}
+              {(bracket?.matches || []).filter(m => m.round === bracketRound).length === 0 && (
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', padding: 16 }}>
+                  No hay partidos en esta ronda.
+                </p>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Tournament result */}
@@ -509,6 +602,13 @@ export default function AdminPage() {
 
       {modal && <ResultModal match={modal} onClose={() => setModal(null)} onSaved={load} />}
       {liveModal && <LiveScoreModal match={liveModal} onClose={() => setLiveModal(null)} onSaved={load} />}
+      {bracketModal && (
+        <BracketEditorModal
+          match={bracketModal}
+          onClose={() => setBracketModal(null)}
+          onSaved={() => { setBracketModal(null); loadBracket() }}
+        />
+      )}
     </div>
   )
 }
@@ -519,4 +619,113 @@ function statusBtnStyle(color) {
     background: color, color: '#fff', border: 'none',
     borderRadius: 5, cursor: 'pointer',
   }
+}
+
+// Modal para editar un partido del bracket
+function BracketEditorModal({ match, onClose, onSaved }) {
+  const { show } = useToast()
+  const [form, setForm] = useState({
+    player1: match.player1 || '',
+    player2: match.player2 || '',
+    winner: match.winner || '',
+    scoreStr: match.scoreStr || '',
+    setsWinner: match.setsWinner || '',
+    setsLoser: match.setsLoser || '',
+  })
+  const [saving, setSaving] = useState(false)
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      await api.put(`/bracket/${match.id}`, {
+        player1: form.player1 || null,
+        player2: form.player2 || null,
+        winner: form.winner || null,
+        scoreStr: form.scoreStr || null,
+        setsWinner: form.setsWinner ? parseInt(form.setsWinner) : null,
+        setsLoser: form.setsLoser ? parseInt(form.setsLoser) : null,
+      })
+      show('Partido del bracket actualizado ✓')
+      onSaved()
+    } catch (e) {
+      show(e.response?.data?.error || 'Error.', 'error')
+    } finally { setSaving(false) }
+  }
+
+  const clearWinner = async () => {
+    setSaving(true)
+    try {
+      await api.put(`/bracket/${match.id}`, { winner: null, scoreStr: null, setsWinner: null, setsLoser: null })
+      show('Resultado limpiado ✓')
+      onSaved()
+    } catch (e) { show('Error.', 'error') }
+    finally { setSaving(false) }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-sheet" onClick={e => e.stopPropagation()}>
+        <div className="modal-handle" />
+        <div className="modal-header">
+          <div className="modal-title">Bracket · {match.round} #{match.positionInRound}</div>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <p className="text-muted mb-12">
+          Escribí los jugadores y, cuando termine el partido, el ganador. Se propaga solo al siguiente.
+        </p>
+
+        <div className="form-group">
+          <label>Jugador 1</label>
+          <input type="text" placeholder="Nombre completo" value={form.player1}
+            onChange={e => setForm(f => ({ ...f, player1: e.target.value }))} />
+        </div>
+        <div className="form-group">
+          <label>Jugador 2</label>
+          <input type="text" placeholder="Nombre completo" value={form.player2}
+            onChange={e => setForm(f => ({ ...f, player2: e.target.value }))} />
+        </div>
+
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>Ganador (dejar vacío si no terminó)</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+          {[form.player1, form.player2].filter(Boolean).map(p => (
+            <button key={p} onClick={() => setForm(f => ({ ...f, winner: f.winner === p ? '' : p }))} style={{
+              flex: 1, padding: '10px 6px', borderRadius: 8, cursor: 'pointer',
+              border: `1px solid ${form.winner === p ? G : 'var(--border)'}`,
+              background: form.winner === p ? G : 'var(--card-bg)',
+              color: form.winner === p ? 'white' : 'var(--text)',
+              fontSize: 13, fontWeight: 600,
+            }}>{p}</button>
+          ))}
+        </div>
+
+        <div className="form-group">
+          <label>Score (ej: 6-4, 6-3, 7-5)</label>
+          <input type="text" placeholder="Score completo" value={form.scoreStr}
+            onChange={e => setForm(f => ({ ...f, scoreStr: e.target.value }))} />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+          <div>
+            <label>Sets ganador</label>
+            <input type="number" min="0" max="3" value={form.setsWinner}
+              onChange={e => setForm(f => ({ ...f, setsWinner: e.target.value }))} />
+          </div>
+          <div>
+            <label>Sets perdedor</label>
+            <input type="number" min="0" max="2" value={form.setsLoser}
+              onChange={e => setForm(f => ({ ...f, setsLoser: e.target.value }))} />
+          </div>
+        </div>
+
+        <button className="btn btn-primary btn-full" onClick={save} disabled={saving} style={{ marginBottom: 8 }}>
+          {saving ? 'Guardando...' : 'Guardar partido'}
+        </button>
+        {match.winner && (
+          <button className="btn btn-danger btn-full" onClick={clearWinner} disabled={saving}>
+            Limpiar resultado
+          </button>
+        )}
+      </div>
+    </div>
+  )
 }

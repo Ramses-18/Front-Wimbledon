@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../context/AuthContext.jsx'
 
-const G = '#1B5E20'
-const BORDER = '#E0E0D8'
+const G = 'var(--green)'
+const BORDER = 'var(--border)'
 
 export default function HistorialPage() {
   const { userId } = useParams()
@@ -55,10 +55,10 @@ export default function HistorialPage() {
   }
 
   const STATUS_COLORS = {
-    'SCHEDULED':  { bg: '#F5F5F5', color: '#888' },
-    'IN_PLAY':    { bg: '#FFEBEE', color: '#C62828' },
+    'SCHEDULED':  { bg: 'var(--cream)', color: 'var(--text-muted)' },
+    'IN_PLAY':    { bg: 'var(--danger-bg)', color: 'var(--danger)' },
     'SUSPENDED':  { bg: '#FFF3E0', color: '#E65100' },
-    'FINISHED':   { bg: '#E8F5E9', color: '#1B5E20' },
+    'FINISHED':   { bg: 'var(--green-light)', color: 'var(--green)' },
     'WALKOVER':   { bg: '#F3E5F5', color: '#7B1FA2' },
     'RETIRED':    { bg: '#F3E5F5', color: '#7B1FA2' },
     'ABANDONED':  { bg: '#EFEBE9', color: '#5D4037' },
@@ -108,7 +108,7 @@ export default function HistorialPage() {
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 32, fontWeight: 700, color: '#C9A84C' }}>
+                <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--gold)' }}>
                   {user.totalPoints ?? 0}
                 </div>
                 <div style={{
@@ -132,13 +132,13 @@ export default function HistorialPage() {
               const ptsClass = pts > 0 ? 'positivo' : 'cero'
               return (
                 <div key={p.matchId} style={{
-                  background: 'white', border: `1px solid ${BORDER}`,
+                  background: 'var(--card-bg)', border: `1px solid ${BORDER}`,
                   borderRadius: 10, padding: '12px 14px', marginBottom: 10,
                 }}>
                   {/* Meta */}
                   <div style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    fontSize: 10, color: '#888', marginBottom: 8,
+                    fontSize: 10, color: 'var(--text-muted)', marginBottom: 8,
                   }}>
                     <span>{fmtFecha(p.matchDate)} · {p.round || '—'}</span>
                     <span style={{
@@ -153,10 +153,10 @@ export default function HistorialPage() {
 
                   {/* Match */}
                   <div style={{
-                    fontSize: 13, fontWeight: 600, color: '#1A1A1A', marginBottom: 8,
+                    fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 8,
                   }}>
                     {p.player1}
-                    <span style={{ color: '#C0C0B8', fontSize: 11, fontWeight: 400, margin: '0 4px' }}>vs</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 400, margin: '0 4px' }}>vs</span>
                     {p.player2}
                   </div>
 
@@ -166,18 +166,18 @@ export default function HistorialPage() {
                     paddingTop: 8, borderTop: `1px dashed ${BORDER}`,
                     fontSize: 12,
                   }}>
-                    <div style={{ color: '#444' }}>
+                    <div style={{ color: 'var(--text-mid)' }}>
                       Tu pick: <strong style={{ color: G }}>{p.pickWinner}</strong>
                       {p.pickSetsWinner ? ` · ${p.pickSetsWinner} sets` : ''}
                       {p.isCorrection && (
-                        <span style={{ fontSize: 10, color: '#C9A84C', marginLeft: 6 }}>✎ corrección</span>
+                        <span style={{ fontSize: 10, color: 'var(--gold)', marginLeft: 6 }}>✎ corrección</span>
                       )}
                     </div>
                     <div style={{
                       fontSize: 14, fontWeight: 700,
                       padding: '3px 10px', borderRadius: 12,
-                      background: pts > 0 ? G : '#E0E0D8',
-                      color: pts > 0 ? 'white' : '#888',
+                      background: pts > 0 ? G : 'var(--border)',
+                      color: pts > 0 ? 'white' : 'var(--text-muted)',
                     }}>
                       {pts > 0 ? `+${pts}` : '0'} pts
                     </div>
@@ -185,8 +185,8 @@ export default function HistorialPage() {
 
                   {/* Real result */}
                   {p.realWinner && (
-                    <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>
-                      Resultado real: <strong style={{ color: '#444' }}>{p.realWinner}</strong>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+                      Resultado real: <strong style={{ color: 'var(--text-mid)' }}>{p.realWinner}</strong>
                       {p.realSetsWinner ? ` · ${p.realSetsWinner} sets` : ''}
                       {p.realScore ? ` · ${p.realScore}` : ''}
                     </div>

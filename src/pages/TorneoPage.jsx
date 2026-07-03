@@ -10,18 +10,18 @@ const PLAYERS = [
   'Sebastian Korda','Lorenzo Musetti','Nicolas Jarry','Arthur Fils',
 ]
 
-const G = '#1B5E20'
-const P = '#4A148C'
+const G = 'var(--green)'
+const P = 'var(--purple)'
 
 function PlayerSelect({ label, value, onChange, disabled }) {
   return (
     <div style={{ marginBottom: 10 }}>
-      <label style={{ fontSize: 11, color: '#888', textTransform: 'none', letterSpacing: 0, marginBottom: 4 }}>
+      <label style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'none', letterSpacing: 0, marginBottom: 4 }}>
         {label}
       </label>
       <select value={value || ''} onChange={e => onChange(e.target.value)} disabled={disabled}
-        style={{ background: value ? '#EDE7F6' : 'white', borderColor: value ? P : '#E0E0D8',
-          color: value ? P : '#888', fontWeight: value ? 700 : 400 }}>
+        style={{ background: value ? '#EDE7F6' : 'white', borderColor: value ? P : 'var(--border)',
+          color: value ? P : 'var(--text-muted)', fontWeight: value ? 700 : 400 }}>
         <option value="">— Elegir jugador —</option>
         {PLAYERS.map(p => <option key={p} value={p}>{p}</option>)}
       </select>
@@ -83,7 +83,7 @@ export default function TorneoPage() {
         <div style={{ padding: 14 }}>
           <PlayerSelect label="Tu pick de campeón" value={pick.champion} onChange={setChampion} />
           {isReal && (
-            <div style={{ marginTop: 8, padding: '8px 10px', background: '#E8F5E9',
+            <div style={{ marginTop: 8, padding: '8px 10px', background: 'var(--green-light)',
               borderRadius: 8, fontSize: 13, fontWeight: 700, color: G }}>
               Campeón real: {result.champion}
               {result.champion === pick.champion && ' ✓ ¡Acertaste! +15 pts'}
@@ -111,7 +111,7 @@ export default function TorneoPage() {
             />
           ))}
           {isReal && result.semis?.filter(Boolean).length > 0 && (
-            <div style={{ marginTop: 8, padding: '8px 10px', background: '#E8F5E9',
+            <div style={{ marginTop: 8, padding: '8px 10px', background: 'var(--green-light)',
               borderRadius: 8, fontSize: 12, color: G }}>
               Semifinalistas reales: {result.semis?.filter(Boolean).join(', ')}
             </div>

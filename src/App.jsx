@@ -7,6 +7,7 @@ import TodayPage    from './pages/TodayPage.jsx'
 import TablaPage    from './pages/TablaPage.jsx'
 import HistorialPage from './pages/HistorialPage.jsx'
 import TorneoPage   from './pages/TorneoPage.jsx'
+import BracketPage  from './pages/BracketPage.jsx'
 import AdminPage    from './pages/AdminPage.jsx'
 import BottomNav    from './components/BottomNav.jsx'
 import TopBar       from './components/TopBar.jsx'
@@ -25,6 +26,7 @@ function AppShell() {
       <main style={{ flex: 1, paddingBottom: 72 }}>
         <Routes>
           <Route path="/"            element={<TodayPage />} />
+          <Route path="/bracket"     element={<BracketPage />} />
           <Route path="/tabla"       element={<TablaPage />} />
           <Route path="/historial/:userId" element={<HistorialPage />} />
           <Route path="/torneo"      element={<TorneoPage />} />

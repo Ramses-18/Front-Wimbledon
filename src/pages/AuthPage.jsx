@@ -32,7 +32,7 @@ export default function AuthPage() {
   const onKey = e => { if (e.key === 'Enter') submit() }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#1B5E20' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--green)' }}>
       {/* Hero */}
       <div style={{ padding: '56px 28px 32px' }}>
         <div style={{ fontSize: 40, marginBottom: 14 }}>🏆</div>
@@ -49,20 +49,20 @@ export default function AuthPage() {
 
       {/* Form card */}
       <div style={{
-        background: '#FAFAF7', borderRadius: '24px 24px 0 0',
+        background: 'var(--cream)', borderRadius: '24px 24px 0 0',
         padding: '28px 24px 48px', flex: 1,
       }}>
         {/* Tabs */}
         <div style={{
-          display: 'flex', border: '1px solid #E0E0D8',
+          display: 'flex', border: '1px solid var(--border)',
           borderRadius: 8, overflow: 'hidden', marginBottom: 24,
         }}>
           {['login','register'].map(t => (
             <button key={t} onClick={() => { setTab(t); setError('') }} style={{
               flex: 1, padding: '11px', fontSize: 14, fontWeight: 600,
               border: 'none', cursor: 'pointer',
-              background: tab === t ? '#1B5E20' : 'white',
-              color: tab === t ? 'white' : '#888',
+              background: tab === t ? 'var(--green)' : 'white',
+              color: tab === t ? 'white' : 'var(--text-muted)',
             }}>
               {t === 'login' ? 'Ingresar' : 'Registrarse'}
             </button>
@@ -98,7 +98,7 @@ export default function AuthPage() {
         {tab === 'login' 
         && 
         (
-          <p style={{ marginTop: 16, textAlign: 'center', fontSize: 12, color: '#888' }}>
+          <p style={{ marginTop: 16, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
             Bienvenido a Wimbledon 2026. Si no tenés cuenta, hacé click en "Registrarse" para crear una.
           </p>
         )

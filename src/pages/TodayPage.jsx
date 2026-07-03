@@ -2,8 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { api } from '../context/AuthContext.jsx'
 import MatchCard from '../components/MatchCard.jsx'
 
-const G = '#1B5E20'
-const BORDER = '#E0E0D8'
+const G = 'var(--green)'
+const BORDER = 'var(--border)'
 
 // Ahora el back manda status autoritativo, no calculamos por horario
 function getMatchStatus(match) {
@@ -60,9 +60,9 @@ export default function TodayPage() {
   const terminados = matches.filter(m => getMatchStatus(m) === 'terminado')
 
   const FILTERS = [
-    { key: 'jugando',   label: '🔴 En juego',   count: jugando.length,    color: '#C62828' },
+    { key: 'jugando',   label: '🔴 En juego',   count: jugando.length,    color: 'var(--danger)' },
     { key: 'por_jugar', label: '⏳ Por jugar',   count: porJugar.length,   color: G },
-    { key: 'terminado', label: '✓ Terminados',   count: terminados.length, color: '#888' },
+    { key: 'terminado', label: '✓ Terminados',   count: terminados.length, color: 'var(--text-muted)' },
   ]
 
   const visible = filter === 'jugando' ? jugando
@@ -101,8 +101,8 @@ export default function TodayPage() {
                 flex: 1, padding: '8px 4px',
                 borderRadius: 8,
                 border: `1px solid ${filter === f.key ? G : BORDER}`,
-                background: filter === f.key ? G : '#fff',
-                color: filter === f.key ? '#fff' : '#888',
+                background: filter === f.key ? G : 'var(--card-bg)',
+                color: filter === f.key ? 'var(--card-bg)' : 'var(--text-muted)',
                 fontSize: 11, fontWeight: 600, cursor: 'pointer',
                 position: 'relative',
               }}>
@@ -110,8 +110,8 @@ export default function TodayPage() {
                 {f.count > 0 && (
                   <span style={{
                     position: 'absolute', top: -6, right: -4,
-                    background: filter === f.key ? '#C9A84C' : f.color,
-                    color: '#fff', fontSize: 9, fontWeight: 700,
+                    background: filter === f.key ? 'var(--gold)' : f.color,
+                    color: 'var(--card-bg)', fontSize: 9, fontWeight: 700,
                     width: 16, height: 16, borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>{f.count}</span>
@@ -126,8 +126,8 @@ export default function TodayPage() {
               padding: '4px 10px', fontSize: 10, fontWeight: 600,
               borderRadius: 6, cursor: 'pointer',
               border: `1px solid ${groupByCourt ? G : BORDER}`,
-              background: groupByCourt ? G : '#fff',
-              color: groupByCourt ? '#fff' : '#888',
+              background: groupByCourt ? G : 'var(--card-bg)',
+              color: groupByCourt ? 'var(--card-bg)' : 'var(--text-muted)',
             }}>
               {groupByCourt ? '🏟️ Agrupado por cancha' : '📋 Lista simple'}
             </button>
@@ -156,8 +156,8 @@ export default function TodayPage() {
                 }}>
                   🏟️ {court}
                   <span style={{
-                    fontSize: 10, color: '#888', fontWeight: 500,
-                    background: '#F1F8F1', padding: '2px 8px', borderRadius: 10,
+                    fontSize: 10, color: 'var(--text-muted)', fontWeight: 500,
+                    background: 'var(--green-pale)', padding: '2px 8px', borderRadius: 10,
                   }}>{courtMatches.length} {courtMatches.length === 1 ? 'partido' : 'partidos'}</span>
                 </div>
                 {courtMatches.map(m => (
