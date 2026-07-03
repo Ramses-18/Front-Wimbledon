@@ -42,11 +42,7 @@ function PickDetailModal({ match, pick, onClose }) {
           {match.player1} vs {match.player2}
         </div>
         <div style={{ fontSize: 12, color: '#888', marginBottom: 14 }}>
-          {match.court}
-          {match.estimatedStartTime ? ` · aprox ${match.estimatedStartTime.slice(0,5)} hs`
-           : match.matchTime ? ` · ${match.matchTime.slice(0,5)} hs`
-           : match.followsMatchId ? ' · a continuación'
-           : ' · horario por confirmar'}
+          {match.court} · {match.matchTime?.slice(0,5)} hs
         </div>
 
         {pts > 0 ? (
@@ -149,16 +145,15 @@ export default function MatchCard({ match, status, onRefresh }) {
   const pick = match.myPick
   const res  = match.result
 
-  // Deadline: usar el del back si viene, si no calcularlo con estimatedStartTime
+  // Calcular deadline
+  // Deadline: si el admin lo forzó → siempre cerrado. Sino, calcular.
   const deadline = (() => {
-    if (match.deadlinePassed) return new Date(0)  // ya cerró según back
+    if (match.deadlineForced) return new Date(0)  // ya cerró
 
-    // Priorizar estimatedStartTime (lo calcula el back con followsMatchId)
+    // usar estimatedStartTime si viene, si no matchTime
     const timeSource = match.estimatedStartTime || match.matchTime
-    if (!timeSource) {
-      // Sin hora estimada (sigue a partido no terminado) → deadline queda abierto
-      return new Date(8640000000000000)
-    }
+    if (!timeSource) return new Date(8640000000000000)  // fecha lejana = abierto
+
     const d = new Date(`${match.matchDate}T${timeSource}`)
     d.setMinutes(d.getMinutes() - 5)
     return d
@@ -166,16 +161,22 @@ export default function MatchCard({ match, status, onRefresh }) {
 
   const fmtDeadline = deadline.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
 
+  // Estado reactivo del cierre — se recalcula cada 30 segundos
   const [closed, setClosed] = useState(new Date() > deadline)
 
   useEffect(() => {
+    // Recalcular inmediatamente
     setClosed(new Date() > deadline)
+
     const interval = setInterval(() => {
-      setClosed(new Date() > deadline)
+      const nowClosed = new Date() > deadline
+      setClosed(nowClosed)
     }, 30_000)
+
     return () => clearInterval(interval)
   }, [deadline.getTime()])
 
+  // Cuando cierra el plazo, colapsar el formulario si estaba abierto
   useEffect(() => {
     if (closed && editing) {
       setEditing(false)
@@ -207,10 +208,13 @@ export default function MatchCard({ match, status, onRefresh }) {
 
   const submit = async (useCorrection = false) => {
     if (!form.winner) { show('Elegí un ganador.', 'error'); return }
+
+    // Bloqueo en frontend antes de llamar al backend
     if (closed && !useCorrection) {
       show('El plazo de pronóstico ya cerró.', 'error')
       return
     }
+
     setBusy(true)
     try {
       const payload = {
@@ -244,8 +248,10 @@ export default function MatchCard({ match, status, onRefresh }) {
     setEditing(true)
   }
 
+  // Mostrar formulario solo si: no hay pick YA y no cerró, o está editando
   const showForm = (!pick && !closed) || editing
 
+  // Cuadraditos de score
   const resultSets = (() => {
     if (!res) return null
     const arr = []
@@ -299,22 +305,6 @@ export default function MatchCard({ match, status, onRefresh }) {
   const winnerOk = pick && res && pick.winner?.toLowerCase() === res.winner?.toLowerCase()
   const pts      = pick?.pointsEarned || 0
 
-  // ── Texto del header según status y estimatedStartTime ──
-  const headerTime = (() => {
-    if (status === 'jugando') return 'En juego ahora'
-    if (status === 'terminado') {
-      if (match.status === 'WALKOVER') return 'Walkover'
-      if (match.status === 'RETIRED') return 'Retiro'
-      if (match.status === 'ABANDONED') return 'Abandonado'
-      return 'Finalizado'
-    }
-    // por_jugar
-    if (match.estimatedStartTime) return `${match.estimatedStartTime.slice(0,5)} hs aprox`
-    if (match.matchTime) return `${match.matchTime.slice(0,5)} hs`
-    if (match.followsMatchId) return 'A continuación'
-    return 'Por confirmar'
-  })()
-
   return (
     <>
       <div className="card" style={{ marginBottom: 12, padding: 0, overflow: 'hidden' }}>
@@ -325,13 +315,13 @@ export default function MatchCard({ match, status, onRefresh }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,.8)' }}>
-            {headerTime}
+            {match.matchTime?.slice(0,5)} hs
           </span>
           <span style={{ fontSize: 11, color: '#C9A84C', fontWeight: 600 }}>
             {match.court || 'Wimbledon'}
           </span>
           {match.round && (
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,.5)' }}>{match.round}</span>
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,.5)' }}>{match.round  || 'Round'}</span>
           )}
         </div>
 
@@ -341,9 +331,7 @@ export default function MatchCard({ match, status, onRefresh }) {
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             padding: '5px 12px', background: '#FFEBEE', borderBottom: `0.5px solid #FFCDD2`,
           }}>
-            <span style={{ fontSize: 10, color: '#888' }}>
-              {match.status === 'SUSPENDED' ? 'Suspendido' : 'En curso'}
-            </span>
+            <span style={{ fontSize: 10, color: '#888' }}>En curso</span>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 4,
               color: '#C62828', fontSize: 9, fontWeight: 700,
@@ -353,7 +341,7 @@ export default function MatchCard({ match, status, onRefresh }) {
                 width: 5, height: 5, borderRadius: '50%', background: '#C62828',
                 animation: 'pulse .8s infinite',
               }} />
-              {match.status === 'SUSPENDED' ? 'SUSP' : 'LIVE'}
+              LIVE
             </span>
           </div>
         )}
@@ -368,15 +356,9 @@ export default function MatchCard({ match, status, onRefresh }) {
             transition: 'background .3s',
           }}>
             <div>
-              <div style={{ fontSize: 10, color: '#888' }}>
-                {match.followsMatchId && !match.estimatedStartTime
-                  ? 'Cierra al terminar el partido previo'
-                  : 'Cierre de pronóstico'}
-              </div>
+              <div style={{ fontSize: 10, color: '#888' }}>Cierre de pronóstico</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: closed ? '#C62828' : '#1A1A1A' }}>
-                {match.followsMatchId && !match.estimatedStartTime
-                  ? 'A confirmar'
-                  : `${fmtDeadline} hs`}
+                {fmtDeadline} hs
               </div>
             </div>
             <span style={{
@@ -387,17 +369,6 @@ export default function MatchCard({ match, status, onRefresh }) {
             }}>
               {closed ? 'Cerrado' : 'Abierto'}
             </span>
-          </div>
-        )}
-
-        {/* Indicador de orden en cancha */}
-        {match.orderInCourt && (
-          <div style={{
-            padding: '4px 12px', fontSize: 10, color: '#888',
-            background: '#FAFAF7', borderBottom: `0.5px solid ${BORDER}`,
-          }}>
-            Partido #{match.orderInCourt} en esta cancha
-            {match.followsMatchId && ' · sigue al anterior'}
           </div>
         )}
 
@@ -482,6 +453,7 @@ export default function MatchCard({ match, status, onRefresh }) {
           {/* ── POR JUGAR ── */}
           {status === 'por_jugar' && (
             <>
+              {/* Pick guardado y no editando */}
               {pick && !showForm && (
                 <>
                   <div style={{
@@ -492,6 +464,7 @@ export default function MatchCard({ match, status, onRefresh }) {
                     🏆 {pick.winner}{pick.setsWinner ? ` · ${pick.setsWinner} sets` : ''}
                     {pick.isCorrection && <span style={{ fontSize: 11, color: '#888', marginLeft: 6 }}>(corrección)</span>}
                   </div>
+                  {/* Botón corrección solo si plazo abierto */}
                   {!closed && (
                     <button onClick={startEdit} style={{
                       width: '100%', padding: '8px', background: '#fff',
@@ -501,6 +474,7 @@ export default function MatchCard({ match, status, onRefresh }) {
                       ↺ Usar corrección del día
                     </button>
                   )}
+                  {/* Aviso si ya cerró */}
                   {closed && (
                     <div style={{
                       fontSize: 11, color: '#C62828', textAlign: 'center',
@@ -512,12 +486,14 @@ export default function MatchCard({ match, status, onRefresh }) {
                 </>
               )}
 
+              {/* Sin pick y cerrado */}
               {!pick && closed && (
                 <p style={{ fontSize: 12, color: '#C62828', fontWeight: 500 }}>
                   Plazo cerrado · No enviaste pronóstico
                 </p>
               )}
 
+              {/* Formulario — solo si está abierto o editando */}
               {showForm && (
                 <div>
                   <div style={{ fontSize: 11, color: '#888', marginBottom: 6 }}>Ganador</div>
