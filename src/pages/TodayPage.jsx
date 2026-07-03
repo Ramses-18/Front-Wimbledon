@@ -1,4 +1,3 @@
-// /////////////////////////////////////////////////////////////
 import React, { useEffect, useState, useCallback } from 'react'
 import { api } from '../context/AuthContext.jsx'
 import MatchCard from '../components/MatchCard.jsx'
@@ -6,20 +5,28 @@ import MatchCard from '../components/MatchCard.jsx'
 const G = '#1B5E20'
 const BORDER = '#E0E0D8'
 
+// Ahora el back manda status autoritativo, no calculamos por horario
 function getMatchStatus(match) {
-  const now = new Date()
-  const start = new Date(`${match.matchDate}T${match.matchTime}`)
-  const deadline = new Date(start.getTime() - 5 * 60 * 1000)
-
-  if (match.result) return 'terminado'
-  if (now >= start) return 'jugando'
-  return 'por_jugar'
+  switch (match.status) {
+    case 'FINISHED':
+    case 'WALKOVER':
+    case 'ABANDONED':
+    case 'RETIRED':
+      return 'terminado'
+    case 'IN_PLAY':
+    case 'SUSPENDED':
+      return 'jugando'
+    case 'SCHEDULED':
+    default:
+      return 'por_jugar'
+  }
 }
 
 export default function TodayPage() {
   const [matches, setMatches]   = useState([])
   const [loading, setLoading]   = useState(true)
   const [filter, setFilter]     = useState('por_jugar')
+  const [groupByCourt, setGroupByCourt] = useState(true)  // agrupar por cancha
 
   const load = useCallback(async () => {
     try {
@@ -62,6 +69,13 @@ export default function TodayPage() {
     : filter === 'por_jugar' ? porJugar
     : terminados
 
+  // Agrupar por cancha (cola por cancha)
+  const byCourt = visible.reduce((acc, m) => {
+    const court = m.court || 'Sin cancha'
+    ;(acc[court] = acc[court] || []).push(m)
+    return acc
+  }, {})
+
   return (
     <div style={{ padding: 16 }}>
       <h2 style={{ marginBottom: 2 }}>Partidos de hoy</h2>
@@ -81,7 +95,7 @@ export default function TodayPage() {
       {!loading && matches.length > 0 && (
         <>
           {/* Filtros */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
             {FILTERS.map(f => (
               <button key={f.key} onClick={() => setFilter(f.key)} style={{
                 flex: 1, padding: '8px 4px',
@@ -106,6 +120,19 @@ export default function TodayPage() {
             ))}
           </div>
 
+          {/* Toggle agrupar por cancha */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+            <button onClick={() => setGroupByCourt(v => !v)} style={{
+              padding: '4px 10px', fontSize: 10, fontWeight: 600,
+              borderRadius: 6, cursor: 'pointer',
+              border: `1px solid ${groupByCourt ? G : BORDER}`,
+              background: groupByCourt ? G : '#fff',
+              color: groupByCourt ? '#fff' : '#888',
+            }}>
+              {groupByCourt ? '🏟️ Agrupado por cancha' : '📋 Lista simple'}
+            </button>
+          </div>
+
           {/* Lista de partidos */}
           {visible.length === 0 ? (
             <div className="empty-state" style={{ padding: '32px 16px' }}>
@@ -118,7 +145,33 @@ export default function TodayPage() {
                  'No hay partidos terminados aún.'}
               </p>
             </div>
+          ) : groupByCourt ? (
+            // Vista agrupada por cancha
+            Object.entries(byCourt).map(([court, courtMatches]) => (
+              <div key={court} style={{ marginBottom: 20 }}>
+                <div style={{
+                  fontSize: 12, fontWeight: 700, color: G,
+                  marginBottom: 8, paddingLeft: 4,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                  🏟️ {court}
+                  <span style={{
+                    fontSize: 10, color: '#888', fontWeight: 500,
+                    background: '#F1F8F1', padding: '2px 8px', borderRadius: 10,
+                  }}>{courtMatches.length} {courtMatches.length === 1 ? 'partido' : 'partidos'}</span>
+                </div>
+                {courtMatches.map(m => (
+                  <MatchCard
+                    key={m.id}
+                    match={m}
+                    status={getMatchStatus(m)}
+                    onRefresh={load}
+                  />
+                ))}
+              </div>
+            ))
           ) : (
+            // Vista plana
             visible.map(m => (
               <MatchCard
                 key={m.id}
