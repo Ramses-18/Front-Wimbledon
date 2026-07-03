@@ -18,21 +18,59 @@ function ResultModal({ match, onClose, onSaved }) {
   const [form, setForm] = useState({
     winner: match.result?.winner || '',
     setsWinner: match.result?.setsWinner ?? '',
+    sets: [
+      { w: match.result?.set1W ?? '', l: match.result?.set1L ?? '' },
+      { w: match.result?.set2W ?? '', l: match.result?.set2L ?? '' },
+      { w: match.result?.set3W ?? '', l: match.result?.set3L ?? '' },
+      { w: match.result?.set4W ?? '', l: match.result?.set4L ?? '' },
+      { w: match.result?.set5W ?? '', l: match.result?.set5L ?? '' },
+    ],
   })
   const [saving, setSaving] = useState(false)
+
+  const setSetScore = (idx, side, val) => setForm(f => {
+    const sets = f.sets.map((s, i) => i === idx ? { ...s, [side]: val } : s)
+    return { ...f, sets }
+  })
+
+  const countSetsWinner = () => {
+    let cnt = 0
+    form.sets.forEach(s => {
+      if (s.w !== '' && s.l !== '') {
+        const w = parseInt(s.w), l = parseInt(s.l)
+        if (!isNaN(w) && !isNaN(l) && w > l) cnt++
+      }
+    })
+    return cnt > 0 ? cnt : null
+  }
 
   const save = async () => {
     if (!form.winner) { show('Elegí el ganador.', 'error'); return }
     setSaving(true)
     try {
-      await api.post(`/admin/matches/${match.id}/result`, {
+      const payload = {
         winner: form.winner,
-        setsWinner: form.setsWinner ? parseInt(form.setsWinner) : null,
+        setsWinner: form.setsWinner ? parseInt(form.setsWinner) : countSetsWinner(),
+        setsLoser: null,
+        gameResult: null,
+      }
+      // Enviar sets individuales
+      form.sets.forEach((s, i) => {
+        const n = i + 1
+        payload[`set${n}W`] = s.w !== '' ? parseInt(s.w) : null
+        payload[`set${n}L`] = s.l !== '' ? parseInt(s.l) : null
       })
+
+      console.log('[ResultModal] guardando resultado matchId=' + match.id, payload)
+
+      await api.post(`/admin/matches/${match.id}/result`, payload)
+      console.log('[ResultModal] ✓ resultado guardado, status debería ser FINISHED ahora')
+
       show('Resultado cargado ✓')
       onSaved()
       onClose()
     } catch (e) {
+      console.error('[ResultModal] error:', e.response?.data || e.message)
       show(e.response?.data?.error || 'Error.', 'error')
     } finally { setSaving(false) }
   }
@@ -69,18 +107,50 @@ function ResultModal({ match, onClose, onSaved }) {
           ))}
         </div>
 
-        <div style={{ fontSize: 12, color: '#888', marginBottom: 6 }}>Sets del ganador</div>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-          {['2','3'].map(v => (
-            <button key={v} onClick={() => setForm(f => ({ ...f, setsWinner: v }))} style={{
-              padding: '9px 22px', borderRadius: 8, cursor: 'pointer',
-              border: `1px solid ${form.setsWinner === v ? G : '#E0E0D8'}`,
-              background: form.setsWinner === v ? G : 'white',
-              color: form.setsWinner === v ? 'white' : '#1A1A1A',
-              fontSize: 15, fontWeight: 700,
-            }}>{v}</button>
-          ))}
-        </div>
+        {/* Sets individuales */}
+        {form.winner && (
+          <>
+            <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>
+              Resultado por set (opcional pero recomendado)
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '56px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
+              <div />
+              {['Set 1','Set 2','Set 3','Set 4','Set 5'].map(s => (
+                <div key={s} style={{ fontSize: 9, color: '#888', textAlign: 'center', fontWeight: 600 }}>{s}</div>
+              ))}
+            </div>
+            {['w','l'].map((side) => (
+              <div key={side} style={{ display: 'grid', gridTemplateColumns: '56px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 600,
+                  color: side === 'w' ? G : '#888',
+                  display: 'flex', alignItems: 'center', overflow: 'hidden',
+                }}>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {side === 'w'
+                      ? form.winner.split(' ').pop()
+                      : (form.winner === match.player1 ? match.player2 : match.player1).split(' ').pop()}
+                  </span>
+                </div>
+                {form.sets.map((s, i) => (
+                  <input key={i} type="number" min="0" max="7" value={s[side]}
+                    onChange={e => setSetScore(i, side, e.target.value)}
+                    style={{
+                      height: 32, borderRadius: 5, textAlign: 'center',
+                      fontSize: 13, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
+                      border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : '#E0E0D8'}`,
+                      background: s[side] !== '' && side === 'w' ? '#E8F5E9' : '#FAFAF7',
+                      color: s[side] !== '' ? (side === 'w' ? G : '#444') : '#ccc',
+                    }}
+                  />
+                ))}
+              </div>
+            ))}
+            <div style={{ fontSize: 11, color: '#888', marginTop: 8, marginBottom: 14 }}>
+              Sets del ganador detectado: <strong>{countSetsWinner() ?? '—'}</strong>
+            </div>
+          </>
+        )}
 
         <button className="btn btn-primary btn-full" onClick={save} disabled={saving}>
           {saving ? 'Guardando...' : 'Guardar resultado'}
@@ -97,15 +167,15 @@ export default function AdminPage() {
   const [tResult, setTResult] = useState({ champion: '', semis: ['','','',''] })
   const [newMatch, setNewMatch] = useState({
     matchDate: new Date().toISOString().slice(0,10),
-    matchTime: '',            // ahora opcional
+    matchTime: '',
     court: 'Centre Court',
     player1: '',
     player2: '',
     round: 'R128',
-    followsMatchId: '',       // vacío = primer partido de la cancha
+    followsMatchId: '',
   })
   const [savingT, setSavingT] = useState(false)
-  const [syncing, setSyncing] = useState(null) // 'schedule' | 'live' | null
+  const [syncing, setSyncing] = useState(null)
 
   const load = async () => {
     try {
@@ -115,6 +185,8 @@ export default function AdminPage() {
       ])
       setMatches(m.data)
       setTResult(tr.data)
+      console.log('[AdminPage] matches cargados:', m.data.length,
+        'con resultado:', m.data.filter(x => x.result).length)
     } catch (e) { console.error(e) }
   }
   useEffect(() => { load() }, [])
@@ -124,13 +196,14 @@ export default function AdminPage() {
     try {
       const payload = {
         matchDate: newMatch.matchDate,
-        matchTime: newMatch.matchTime || null,    // null si no viene
+        matchTime: newMatch.matchTime || null,
         court: newMatch.court,
         player1: newMatch.player1,
         player2: newMatch.player2,
         round: newMatch.round,
         followsMatchId: newMatch.followsMatchId || null,
       }
+      console.log('[AdminPage] creando partido:', payload)
       await api.post('/admin/matches', payload)
       show('Partido agregado ✓')
       setNewMatch(n => ({ ...n, player1: '', player2: '', followsMatchId: '' }))
@@ -146,39 +219,36 @@ export default function AdminPage() {
 
   const changeStatus = async (matchId, newStatus) => {
     const labels = {
-      'SCHEDULED': 'reprogramar',
       'IN_PLAY': 'iniciar',
       'SUSPENDED': 'suspender',
-      'FINISHED': 'finalizar',
       'WALKOVER': 'marcar walkover',
       'RETIRED': 'marcar retiro',
       'ABANDONED': 'abandonar',
     }
     if (!confirm(`¿${labels[newStatus] || 'cambiar status a'} ${newStatus}?`)) return
     try {
+      console.log('[AdminPage] changeStatus:', { matchId, newStatus })
       await api.patch(`/admin/matches/${matchId}/status`, { status: newStatus })
       show(`Status cambiado a ${newStatus} ✓`)
       load()
-    } catch (e) { show(e.response?.data?.error || 'Error.', 'error') }
-  }
-
-  const syncSchedule = async () => {
-    setSyncing('schedule')
-    try {
-      await api.post('/admin/sync/schedule')
-      show('Schedule sincronizado ✓')
-      load()
-    } catch (e) { show(e.response?.data?.error || 'Error en sync.', 'error') }
-    finally { setSyncing(null) }
+    } catch (e) {
+      console.error('[AdminPage] error changeStatus:', e.response?.data || e.message)
+      show(e.response?.data?.error || 'Error.', 'error')
+    }
   }
 
   const syncLive = async () => {
     setSyncing('live')
     try {
-      await api.post('/admin/sync/live')
+      console.log('[AdminPage] sync live...')
+      const { data } = await api.post('/admin/sync/live')
+      console.log('[AdminPage] sync live respuesta:', data)
       show('Live sync ejecutado ✓')
       load()
-    } catch (e) { show(e.response?.data?.error || 'Error en sync.', 'error') }
+    } catch (e) {
+      console.error('[AdminPage] error sync live:', e.response?.data || e.message)
+      show(e.response?.data?.error || 'Error en sync.', 'error')
+    }
     finally { setSyncing(null) }
   }
 
@@ -195,7 +265,6 @@ export default function AdminPage() {
     const semis = [...(r.semis||['','','',''])]; semis[i] = v; return { ...r, semis }
   })
 
-  // Partidos de la cancha seleccionada para el dropdown de followsMatchId
   const courtMatchesForFollows = matches.filter(m => m.court === newMatch.court)
 
   const STATUS_COLORS = {
@@ -215,14 +284,6 @@ export default function AdminPage() {
 
       {/* Sync buttons */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        <button
-          className="btn btn-primary"
-          style={{ flex: 1, background: syncing === 'schedule' ? '#ccc' : G }}
-          onClick={syncSchedule}
-          disabled={syncing !== null}
-        >
-          {syncing === 'schedule' ? 'Sincronizando...' : '📅 Sync schedule'}
-        </button>
         <button
           className="btn btn-primary"
           style={{ flex: 1, background: syncing === 'live' ? '#ccc' : '#2E7D32' }}
@@ -300,7 +361,7 @@ export default function AdminPage() {
         <button className="btn btn-primary btn-full" onClick={addMatch}>+ Agregar partido</button>
       </div>
 
-      {/* Today's matches — con status badge y acciones */}
+      {/* Today's matches */}
       <h3 style={{ marginBottom: 10, fontSize: 14, color: '#888', textTransform: 'uppercase', letterSpacing: '.06em' }}>
         Partidos de hoy ({matches.length})
       </h3>
@@ -312,7 +373,6 @@ export default function AdminPage() {
           <div key={m.id} style={{
             padding: '11px 14px',
             borderBottom: i < matches.length - 1 ? '1px solid #E0E0D8' : 'none',
-            gap: 8,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{
@@ -327,6 +387,9 @@ export default function AdminPage() {
               )}
               {m.followsMatchId && (
                 <span style={{ fontSize: 10, color: '#888' }}>· sigue a #{m.followsMatchId}</span>
+              )}
+              {m.result && (
+                <span style={{ fontSize: 10, color: G, fontWeight: 700 }}>· ✓ resultado cargado</span>
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -353,7 +416,7 @@ export default function AdminPage() {
               }}>✕</button>
             </div>
 
-            {/* Acciones rápidas de status (solo si no está finalizado) */}
+            {/* Acciones rápidas de status */}
             {m.status !== 'FINISHED' && m.status !== 'WALKOVER' && m.status !== 'RETIRED' && m.status !== 'ABANDONED' && (
               <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
                 {m.status === 'SCHEDULED' && (
@@ -362,10 +425,11 @@ export default function AdminPage() {
                 )}
                 {m.status === 'IN_PLAY' && (
                   <>
+                    {/* ✓ Finalizar abre el modal de resultado, NO cambia status directo */}
+                    <button onClick={() => setModal(m)}
+                      style={statusBtnStyle(G)}>✓ Finalizar</button>
                     <button onClick={() => changeStatus(m.id, 'SUSPENDED')}
                       style={statusBtnStyle('#FF9800')}>⏸ Suspender</button>
-                    <button onClick={() => changeStatus(m.id, 'FINISHED')}
-                      style={statusBtnStyle(G)}>✓ Finalizar</button>
                   </>
                 )}
                 {m.status === 'SUSPENDED' && (
