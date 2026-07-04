@@ -145,44 +145,8 @@ export default function MatchCard({ match, status, onRefresh }) {
   const pick = match.myPick
   const res  = match.result
 
-  // Calcular deadline
-  // Deadline: si el admin lo forzó → siempre cerrado. Sino, calcular.
-  const deadline = (() => {
-    if (match.deadlineForced) return new Date(0)  // ya cerró
-
-    // usar estimatedStartTime si viene, si no matchTime
-    const timeSource = match.estimatedStartTime || match.matchTime
-    if (!timeSource) return new Date(8640000000000000)  // fecha lejana = abierto
-
-    const d = new Date(`${match.matchDate}T${timeSource}`)
-    d.setMinutes(d.getMinutes() - 5)
-    return d
-  })()
-
-  const fmtDeadline = deadline.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
-
-  // Estado reactivo del cierre — se recalcula cada 30 segundos
-  const [closed, setClosed] = useState(new Date() > deadline)
-
-  useEffect(() => {
-    // Recalcular inmediatamente
-    setClosed(new Date() > deadline)
-
-    const interval = setInterval(() => {
-      const nowClosed = new Date() > deadline
-      setClosed(nowClosed)
-    }, 30_000)
-
-    return () => clearInterval(interval)
-  }, [deadline.getTime()])
-
-  // Cuando cierra el plazo, colapsar el formulario si estaba abierto
-  useEffect(() => {
-    if (closed && editing) {
-      setEditing(false)
-      show('El plazo de pronóstico cerró.', 'error')
-    }
-  }, [closed])
+  // FIX Req 3: El deadline ahora es 100% manual — solo deadlineForced del admin
+  const closed = match.deadlineForced === true
 
   const [form, setForm] = useState({
     winner: pick?.winner || '',
@@ -209,7 +173,6 @@ export default function MatchCard({ match, status, onRefresh }) {
   const submit = async (useCorrection = false) => {
     if (!form.winner) { show('Elegí un ganador.', 'error'); return }
 
-    // Bloqueo en frontend antes de llamar al backend
     if (closed && !useCorrection) {
       show('El plazo de pronóstico ya cerró.', 'error')
       return
@@ -239,7 +202,10 @@ export default function MatchCard({ match, status, onRefresh }) {
   }
 
   const startEdit = () => {
-    if (closed) { show('El plazo ya cerró, no podés corregir.', 'error'); return }
+    if (closed) {
+      show('El plazo ya cerró, usá la corrección del día si no la usaste.', 'error')
+      return
+    }
     const savedSets = [1,2,3,4,5].map(i => ({
       w: pick?.[`set${i}W`] != null ? String(pick[`set${i}W`]) : '',
       l: pick?.[`set${i}L`] != null ? String(pick[`set${i}L`]) : '',
@@ -248,8 +214,11 @@ export default function MatchCard({ match, status, onRefresh }) {
     setEditing(true)
   }
 
-  // Mostrar formulario solo si: no hay pick YA y no cerró, o está editando
+  // FIX Req 1: Mostrar formulario si no hay pick y no cerró, o si está editando
   const showForm = (!pick && !closed) || editing
+
+  // FIX Req 1: Permitir corrección durante IN_PLAY o terminado (si el admin cerró pero el usuario quiere corregir)
+  const canCorrect = closed && pick && !pick.isCorrection && status !== 'terminado'
 
   // Cuadraditos de score
   const resultSets = (() => {
@@ -346,28 +315,25 @@ export default function MatchCard({ match, status, onRefresh }) {
           </div>
         )}
 
-        {/* Banner cierre — solo para partidos por jugar */}
-        {status === 'por_jugar' && (
+        {/* Banner cierre — FIX Req 3: solo muestra si el admin forzó el cierre */}
+        {closed && status === 'por_jugar' && (
           <div style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             padding: '6px 12px',
-            background: closed ? 'var(--danger-bg)' : 'var(--cream)',
-            borderBottom: `0.5px solid ${closed ? 'var(--danger)' : BORDER}`,
-            transition: 'background .3s',
+            background: 'var(--danger-bg)',
+            borderBottom: '0.5px solid var(--danger)',
           }}>
             <div>
               <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Cierre de pronóstico</div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: closed ? 'var(--danger)' : 'var(--text)' }}>
-                {fmtDeadline} hs
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--danger)' }}>
+                Cerrado por el admin
               </div>
             </div>
             <span style={{
               fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
-              background: closed ? 'var(--danger)' : 'var(--green-mid)',
-              color: closed ? 'var(--danger)' : G,
-              transition: 'all .3s',
+              background: 'var(--danger)', color: 'white',
             }}>
-              {closed ? 'Cerrado' : 'Abierto'}
+              Cerrado
             </span>
           </div>
         )}
@@ -408,6 +374,7 @@ export default function MatchCard({ match, status, onRefresh }) {
                   }}>
                     {winnerOk ? '✓' : '✗'} {pick.winner}
                     {pick.setsWinner ? ` · ${pick.setsWinner} sets` : ''}
+                    {pick.isCorrection && <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 6 }}>(corrección)</span>}
                   </div>
                   <span style={{
                     background: pts > 0 ? G : 'var(--border)',
@@ -434,17 +401,36 @@ export default function MatchCard({ match, status, onRefresh }) {
           {/* ── EN JUEGO ── */}
           {status === 'jugando' && (
             pick ? (
-              <div style={{
-                background: 'var(--green-pale)', border: '1px solid var(--green-mid)',
-                borderRadius: 6, padding: '7px 10px', fontSize: 12,
-                color: G, fontWeight: 600, display: 'flex', justifyContent: 'space-between',
-              }}>
-                🏆 {pick.winner}{pick.setsWinner ? ` · ${pick.setsWinner} sets` : ''}
-                <span style={{
-                  background: 'var(--gold-bg)', color: 'var(--gold)', border: '1px solid var(--gold)',
-                  fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 20,
-                }}>En juego</span>
-              </div>
+              <>
+                <div style={{
+                  background: 'var(--green-pale)', border: '1px solid var(--green-mid)',
+                  borderRadius: 6, padding: '7px 10px', fontSize: 12,
+                  color: G, fontWeight: 600, display: 'flex', justifyContent: 'space-between', marginBottom: 6,
+                }}>
+                  🏆 {pick.winner}{pick.setsWinner ? ` · ${pick.setsWinner} sets` : ''}
+                  <span style={{
+                    background: 'var(--gold-bg)', color: 'var(--gold)', border: '1px solid var(--gold)',
+                    fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 20,
+                  }}>En juego</span>
+                </div>
+                {/* FIX Req 1: Botón de corrección visible durante IN_PLAY */}
+                {canCorrect && (
+                  <button onClick={() => {
+                    const savedSets = [1,2,3,4,5].map(i => ({
+                      w: pick?.[`set${i}W`] != null ? String(pick[`set${i}W`]) : '',
+                      l: pick?.[`set${i}L`] != null ? String(pick[`set${i}L`]) : '',
+                    }))
+                    setForm({ winner: pick?.winner || '', sets: savedSets })
+                    setEditing(true)
+                  }} style={{
+                    width: '100%', padding: '8px', background: 'var(--card-bg)',
+                    border: `1px dashed ${GM}`, borderRadius: 7,
+                    color: GM, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  }}>
+                    ↺ Usar corrección del día
+                  </button>
+                )}
+              </>
             ) : (
               <p style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>No enviaste pronóstico</p>
             )
@@ -480,7 +466,7 @@ export default function MatchCard({ match, status, onRefresh }) {
                       fontSize: 11, color: 'var(--danger)', textAlign: 'center',
                       padding: '5px 0', fontWeight: 500,
                     }}>
-                      Plazo cerrado · pronóstico guardado
+                      Plazo cerrado por el admin · pronóstico guardado
                     </div>
                   )}
                 </>
@@ -489,11 +475,11 @@ export default function MatchCard({ match, status, onRefresh }) {
               {/* Sin pick y cerrado */}
               {!pick && closed && (
                 <p style={{ fontSize: 12, color: 'var(--danger)', fontWeight: 500 }}>
-                  Plazo cerrado · No enviaste pronóstico
+                  Plazo cerrado por el admin · No enviaste pronóstico
                 </p>
               )}
 
-              {/* Formulario — solo si está abierto o editando */}
+              {/* Formulario — solo si está abierto o editando (con corrección) */}
               {showForm && (
                 <div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>Ganador</div>
@@ -555,13 +541,13 @@ export default function MatchCard({ match, status, onRefresh }) {
                   )}
 
                   <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                    <button onClick={() => submit(editing)} disabled={busy || closed} style={{
-                      flex: 1, padding: '12px', background: busy || closed ? 'var(--text-muted)' : G,
+                    <button onClick={() => submit(editing)} disabled={busy} style={{
+                      flex: 1, padding: '12px', background: busy ? 'var(--text-muted)' : G,
                       color: 'var(--card-bg)', border: 'none', borderRadius: 7,
                       fontSize: 13, fontWeight: 600,
-                      cursor: busy || closed ? 'not-allowed' : 'pointer',
+                      cursor: busy ? 'not-allowed' : 'pointer',
                     }}>
-                      {busy ? 'Guardando...' : closed ? 'Plazo cerrado' : editing ? 'Guardar corrección' : 'Guardar pronóstico'}
+                      {busy ? 'Guardando...' : editing ? 'Guardar corrección' : 'Guardar pronóstico'}
                     </button>
                     <button onClick={() => { setEditing(false); setForm({ winner: pick?.winner || '', sets: [emptySet(),emptySet(),emptySet(),emptySet(),emptySet()] }) }} style={{
                       padding: '12px 14px', background: 'none', color: 'var(--text-muted)',
