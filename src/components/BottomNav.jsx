@@ -29,9 +29,9 @@ export default function BottomNav() {
         const active = pathname === t.path
         return (
           <button key={t.path} onClick={() => navigate(t.path)} style={{
-            flex: 1, padding: '12px 4px 10px', border: 'none', background: 'none',
+            flex: 1, padding: '0 4px', border: 'none', background: 'none',
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: 3,
+            alignItems: 'center', justifyContent: 'center', height: 52,
             color: active ? 'var(--green)' : 'var(--text-muted)',
             fontSize: 13, fontWeight: active ? 700 : 500,
           }}>
