@@ -12,6 +12,26 @@ const emptySet = () => ({ w: '', l: '' })
 function PickDetailModal({ match, pick, onClose }) {
   const res = match.result
 
+  // ── DEBUG LOGS ──
+  console.group('[PickDetailModal] matchId:', match.id)
+  console.log('match.result (res):', JSON.stringify(res, null, 2))
+  console.log('pick:', JSON.stringify(pick, null, 2))
+  console.log('pick.setsWinner:', pick?.setsWinner, 'typeof:', typeof pick?.setsWinner)
+  console.log('pick.setsLoser:', pick?.setsLoser, 'typeof:', typeof pick?.setsLoser)
+  console.log('pick.set1W:', pick?.set1W, 'pick.set1L:', pick?.set1L)
+  console.log('pick.set2W:', pick?.set2W, 'pick.set2L:', pick?.set2L)
+  console.log('pick.set3W:', pick?.set3W, 'pick.set3L:', pick?.set3L)
+  console.log('pick.set4W:', pick?.set4W, 'pick.set4L:', pick?.set4L)
+  console.log('pick.set5W:', pick?.set5W, 'pick.set5L:', pick?.set5L)
+  console.log('res.setsWinner:', res?.setsWinner, 'res.setsLoser:', res?.setsLoser)
+  console.log('res.set1W:', res?.set1W, 'res.set1L:', res?.set1L)
+  console.log('res.set2W:', res?.set2W, 'res.set2L:', res?.set2L)
+  console.log('res.set3W:', res?.set3W, 'res.set3L:', res?.set3L)
+  console.log('res.set4W:', res?.set4W, 'res.set4L:', res?.set4L)
+  console.log('res.set5W:', res?.set5W, 'res.set5L:', res?.set5L)
+  console.log('pick.pointsEarned:', pick?.pointsEarned, 'typeof:', typeof pick?.pointsEarned)
+  console.groupEnd()
+
   const pickSets = pick ? [1,2,3,4,5].map(i => ({
     w: pick[`set${i}W`], l: pick[`set${i}L`]
   })).filter(s => s.w != null) : []
@@ -24,6 +44,8 @@ function PickDetailModal({ match, pick, onClose }) {
   const setsOk   = winnerOk && pick.setsWinner != null && pick.setsWinner === res.setsWinner
   const exactOk  = pick?.pointsEarned >= 14
   const pts      = pick?.pointsEarned || 0
+
+  console.log('[PickDetailModal] computed:', { winnerOk, setsOk, exactOk, pts, pickSets, resSets })
 
   return (
     <div onClick={onClose} style={{
@@ -273,6 +295,17 @@ export default function MatchCard({ match, status, onRefresh }) {
 
   const winnerOk = pick && res && pick.winner?.toLowerCase() === res.winner?.toLowerCase()
   const pts      = pick?.pointsEarned || 0
+
+  // ── DEBUG: log terminado matches con pick ──
+  if (status === 'terminado' && pick) {
+    console.group('[MatchCard] TERMINADO con pick — matchId:', match.id, match.player1, 'vs', match.player2)
+    console.log('status del match:', match.status)
+    console.log('match.result:', JSON.stringify(res, null, 2))
+    console.log('match.myPick:', JSON.stringify(pick, null, 2))
+    console.log('winnerOk (frontend):', winnerOk)
+    console.log('pts (pick.pointsEarned):', pick.pointsEarned)
+    console.groupEnd()
+  }
 
   return (
     <>
