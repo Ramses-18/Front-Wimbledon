@@ -479,6 +479,7 @@ export default function AdminPage() {
         const tomorrowStr = tmr.toLocaleDateString('en-CA')
         const todayM = matches.filter(m => m.matchDate === todayStr)
         const tomorrowM = matches.filter(m => m.matchDate === tomorrowStr)
+        const upcomingM = matches.filter(m => m.matchDate > tomorrowStr)
 
         const renderMatchList = (list) => list.length === 0
           ? <p style={{ padding: 16, fontSize: 13, color: 'var(--text-muted)' }}>No hay partidos.</p>
@@ -575,6 +576,36 @@ export default function AdminPage() {
             <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
               {renderMatchList(tomorrowM)}
             </div>
+
+            {upcomingM.length > 0 && (() => {
+              const grouped = {}
+              upcomingM.forEach(m => {
+                if (!grouped[m.matchDate]) grouped[m.matchDate] = []
+                grouped[m.matchDate].push(m)
+              })
+              const dateStr = (d) => {
+                const [y, mo, da] = d.split('-')
+                return new Date(y, mo - 1, da).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
+              }
+              return (
+                <>
+                  <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+                    Proximos dias ({upcomingM.length})
+                  </h3>
+                  {Object.entries(grouped).sort().map(([date, list]) => (
+                    <div key={date} style={{ marginBottom: 20 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-mid)', marginBottom: 6, paddingLeft: 4, textTransform: 'capitalize' }}>
+                        {dateStr(date)}
+                        <span style={{ color: 'var(--text-muted)', fontWeight: 500, marginLeft: 6 }}>· {list.length} partido{list.length > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                        {renderMatchList(list)}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )
+            })()}
           </>
         )
       })()}
