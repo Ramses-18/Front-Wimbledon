@@ -354,7 +354,7 @@ export default function MatchCard({ match, status, onRefresh }) {
         )}
 
         {/* Jugadores */}
-        <div style={{ padding: '11px 12px 0' }}>
+        <div style={{ padding: '11px 12px 10px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0' }}>
             <span style={{ fontSize: 14, fontWeight: 600, color: res?.winner === match.player1 ? G : 'var(--text)' }}>
               {match.player1}{res?.winner === match.player1 ? ' ✓' : ''}

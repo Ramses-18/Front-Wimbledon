@@ -21,6 +21,18 @@ function getMatchStatus(match) {
   }
 }
 
+function getMatchDateLabel(match) {
+  const today = new Date()
+  const todayStr = today.toLocaleDateString('en-CA')
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowStr = tomorrow.toLocaleDateString('en-CA')
+  const matchDate = match.matchDate
+  if (matchDate === todayStr) return 'hoy'
+  if (matchDate === tomorrowStr) return 'manana'
+  return 'otro'
+}
+
 export default function TodayPage() {
   const [matches, setMatches]   = useState([])
   const [loading, setLoading]   = useState(true)
@@ -29,7 +41,7 @@ export default function TodayPage() {
 
   const load = useCallback(async () => {
     try {
-      const { data } = await api.get('/matches/today')
+      const { data } = await api.get('/matches/upcoming')
       setMatches(data)
 
       const jugando    = data.filter(m => getMatchStatus(m) === 'jugando').length
@@ -66,25 +78,59 @@ export default function TodayPage() {
     : filter === 'por_jugar' ? porJugar
     : terminados
 
-  const byCourt = visible.reduce((acc, m) => {
-    const court = m.court || 'Sin cancha'
-    ;(acc[court] = acc[court] || []).push(m)
-    return acc
-  }, {})
+  // Separar en hoy y mañana
+  const todayMatches = visible.filter(m => getMatchDateLabel(m) === 'hoy')
+  const tomorrowMatches = visible.filter(m => getMatchDateLabel(m) === 'manana')
+
+  const renderGroup = (courtMatches) => {
+    const byCourt = courtMatches.reduce((acc, m) => {
+      const court = m.court || 'Sin cancha'
+      ;(acc[court] = acc[court] || []).push(m)
+      return acc
+    }, {})
+
+    if (groupByCourt) {
+      return Object.entries(byCourt).map(([court, cMatches]) => (
+        <div key={court} style={{ marginBottom: 20 }}>
+          <div style={{
+            fontSize: 12, fontWeight: 700, color: G,
+            marginBottom: 8, paddingLeft: 4,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            {court}
+            <span style={{
+              fontSize: 10, color: 'var(--text-muted)', fontWeight: 500,
+              background: 'var(--green-pale)', padding: '2px 8px', borderRadius: 10,
+            }}>{cMatches.length} {cMatches.length === 1 ? 'partido' : 'partidos'}</span>
+          </div>
+          {cMatches.map(m => (
+            <MatchCard key={m.id} match={m} status={getMatchStatus(m)} onRefresh={load} />
+          ))}
+        </div>
+      ))
+    }
+
+    return courtMatches.map(m => (
+      <MatchCard key={m.id} match={m} status={getMatchStatus(m)} onRefresh={load} />
+    ))
+  }
+
+  const todayStr = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })
+  const tomorrowDate = new Date()
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1)
+  const tomorrowStr = tomorrowDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
     <div style={{ padding: 16 }}>
-      <h2 style={{ marginBottom: 2 }}>Partidos de hoy</h2>
-      <p className="text-muted" style={{ marginBottom: 16 }}>
-        {new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
-      </p>
+      <h2 style={{ marginBottom: 2 }}>Partidos</h2>
+      <p className="text-muted" style={{ marginBottom: 16 }}>{todayStr}</p>
 
       {loading && <div className="spinner" />}
 
       {!loading && matches.length === 0 && (
         <div className="empty-state">
           <div className="icon">🎾</div>
-          <p>No hay partidos cargados para hoy.</p>
+          <p>No hay partidos cargados para hoy ni mañana.</p>
         </div>
       )}
 
@@ -138,39 +184,28 @@ export default function TodayPage() {
                  'No hay partidos terminados aún.'}
               </p>
             </div>
-          ) : groupByCourt ? (
-            Object.entries(byCourt).map(([court, courtMatches]) => (
-              <div key={court} style={{ marginBottom: 20 }}>
-                <div style={{
-                  fontSize: 12, fontWeight: 700, color: G,
-                  marginBottom: 8, paddingLeft: 4,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                  {court}
-                  <span style={{
-                    fontSize: 10, color: 'var(--text-muted)', fontWeight: 500,
-                    background: 'var(--green-pale)', padding: '2px 8px', borderRadius: 10,
-                  }}>{courtMatches.length} {courtMatches.length === 1 ? 'partido' : 'partidos'}</span>
-                </div>
-                {courtMatches.map(m => (
-                  <MatchCard
-                    key={m.id}
-                    match={m}
-                    status={getMatchStatus(m)}
-                    onRefresh={load}
-                  />
-                ))}
-              </div>
-            ))
           ) : (
-            visible.map(m => (
-              <MatchCard
-                key={m.id}
-                match={m}
-                status={getMatchStatus(m)}
-                onRefresh={load}
-              />
-            ))
+            <>
+              {/* Hoy */}
+              {todayMatches.length > 0 && (
+                <>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                    Hoy ({todayMatches.length})
+                  </div>
+                  {renderGroup(todayMatches)}
+                </>
+              )}
+
+              {/* Mañana */}
+              {tomorrowMatches.length > 0 && (
+                <>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em', marginTop: tomorrowMatches.length > 0 && todayMatches.length > 0 ? 8 : 0 }}>
+                    Mañana ({tomorrowMatches.length})
+                  </div>
+                  {renderGroup(tomorrowMatches)}
+                </>
+              )}
+            </>
           )}
         </>
       )}

@@ -111,7 +111,7 @@ export default function OnboardingModal({ onClose, onComplete }) {
 
         {/* Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {step === 3 ? (
+          {step === 2 ? (
             <button onClick={handleEnableNotifications} style={{
               width: '100%', padding: '14px', background: 'var(--green)',
               color: 'white', border: 'none', borderRadius: 10,
@@ -129,7 +129,7 @@ export default function OnboardingModal({ onClose, onComplete }) {
             </button>
           )}
 
-          {step > 0 && step < 3 && (
+          {step > 0 && step < 2 && (
             <button onClick={() => setStep(s => s - 1)} style={{
               background: 'none', border: 'none', color: 'var(--text-muted)',
               fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: '8px',
@@ -138,7 +138,7 @@ export default function OnboardingModal({ onClose, onComplete }) {
             </button>
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <button onClick={handleNext} style={{
               background: 'none', border: 'none', color: 'var(--text-muted)',
               fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: '8px',

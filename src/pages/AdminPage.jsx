@@ -11,6 +11,7 @@ function ResultModal({ match, onClose, onSaved }) {
   const { show } = useToast()
   const [form, setForm] = useState({
     winner: match.result?.winner || '',
+    retired: false,
     sets: [
       { w: match.result?.set1W ?? '', l: match.result?.set1L ?? '' },
       { w: match.result?.set2W ?? '', l: match.result?.set2L ?? '' },
@@ -46,17 +47,20 @@ function ResultModal({ match, onClose, onSaved }) {
       const { setsWinner, setsLoser } = countSetsWinner()
       const payload = {
         winner: form.winner,
-        setsWinner,
-        setsLoser,
-        gameResult: null,
+        setsWinner: form.retired ? null : setsWinner,
+        setsLoser: form.retired ? null : setsLoser,
+        gameResult: form.retired ? 'RET' : null,
+        retired: form.retired || null,
       }
-      form.sets.forEach((s, i) => {
-        const n = i + 1
-        payload[`set${n}W`] = s.w !== '' ? parseInt(s.w) : null
-        payload[`set${n}L`] = s.l !== '' ? parseInt(s.l) : null
-      })
+      if (!form.retired) {
+        form.sets.forEach((s, i) => {
+          const n = i + 1
+          payload[`set${n}W`] = s.w !== '' ? parseInt(s.w) : null
+          payload[`set${n}L`] = s.l !== '' ? parseInt(s.l) : null
+        })
+      }
       await api.post(`/admin/matches/${match.id}/result`, payload)
-      show('Resultado cargado ✓')
+      show(form.retired ? 'Resultado cargado (retiro) ✓' : 'Resultado cargado ✓')
       onSaved()
       onClose()
     } catch (e) {
@@ -96,7 +100,7 @@ function ResultModal({ match, onClose, onSaved }) {
           ))}
         </div>
 
-        {form.winner && (
+        {form.winner && !form.retired && (
           <>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Resultado por set</div>
             <div style={{ display: 'grid', gridTemplateColumns: '60px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
@@ -138,8 +142,33 @@ function ResultModal({ match, onClose, onSaved }) {
           </>
         )}
 
+        {/* Opcion de retiro */}
+        {form.winner && (
+          <div style={{
+            marginBottom: 14, padding: '10px 12px', borderRadius: 8,
+            border: `1px solid ${form.retired ? '#9C27B0' : 'var(--border)'}`,
+            background: form.retired ? 'rgba(156,39,176,0.08)' : 'var(--card-bg)',
+          }}>
+            <label style={{
+              display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13,
+            }}>
+              <input type="checkbox" checked={form.retired}
+                onChange={e => setForm(f => ({ ...f, retired: e.target.checked }))
+                style={{ width: 18, height: 18, accentColor: '#9C27B0' }} />
+              <div>
+                <div style={{ fontWeight: 600, color: form.retired ? '#9C27B0' : 'var(--text)' }}>
+                  Un jugador se retiró
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                  Se guarda como retiro sin necesidad de cargar sets.
+                </div>
+              </div>
+            </label>
+          </div>
+        )}
+
         <button className="btn btn-primary btn-full" onClick={save} disabled={saving}>
-          {saving ? 'Guardando...' : 'Guardar resultado'}
+          {saving ? 'Guardando...' : form.retired ? 'Guardar como retiro' : 'Guardar resultado'}
         </button>
       </div>
     </div>
@@ -250,7 +279,6 @@ export default function AdminPage() {
     followsMatchId: '',
   })
   const [savingT, setSavingT] = useState(false)
-  const [syncing, setSyncing] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
   // Bracket management
   const [bracket, setBracket] = useState(null)
@@ -262,7 +290,7 @@ export default function AdminPage() {
   const load = async () => {
     try {
       const [m, tr] = await Promise.all([
-        api.get('/matches/today'),
+        api.get('/matches/upcoming'),
         api.get('/tournament/result'),
       ])
       setMatches(m.data)
@@ -354,17 +382,6 @@ export default function AdminPage() {
     } catch (e) { show(e.response?.data?.error || 'Error.', 'error') }
   }
 
-  // FIX Req 4: Sync manual de partidos de mañana (el automático es 1 vez/día a las 20:00)
-  const syncTomorrow = async () => {
-    setSyncing('tomorrow')
-    try {
-      await api.post('/admin/sync/tomorrow')
-      show('Sync de mañana ejecutado ✓')
-      load()
-    } catch (e) { show('Error en sync.', 'error') }
-    finally { setSyncing(null) }
-  }
-
   const saveTResult = async () => {
     setSavingT(true)
     try {
@@ -394,13 +411,9 @@ export default function AdminPage() {
       <h2 style={{ marginBottom: 6, fontSize: 20 }}>Panel de administrador</h2>
       <p className="text-muted" style={{ marginBottom: 20, fontSize: 13 }}>Gestión de partidos y resultados</p>
 
-      {/* Sync + Agregar partido */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-        <button className="btn btn-primary" style={{ flex: 1, background: syncing === 'tomorrow' ? 'var(--text-muted)' : 'var(--green-mid)' }}
-          onClick={syncTomorrow} disabled={syncing !== null}>
-          {syncing === 'tomorrow' ? 'Sincronizando...' : 'Sincronizar y Añadir'}
-        </button>
-        <button className="btn btn-primary" style={{ flex: 1, background: showAddForm ? 'var(--danger)' : G }}
+      {/* Agregar partido */}
+      <div style={{ marginBottom: 20 }}>
+        <button className="btn btn-primary btn-full" style={{ background: showAddForm ? 'var(--danger)' : G }}
           onClick={() => setShowAddForm(f => !f)}>
           {showAddForm ? '✕ Cerrar' : '+ Agregar partido'}
         </button>
@@ -459,18 +472,20 @@ export default function AdminPage() {
       </div>
       )}
 
-      {/* Today's matches */}
-      <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-        Partidos de hoy ({matches.length})
-      </h3>
-      <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
-        {matches.length === 0 && (
-          <p style={{ padding: 16, fontSize: 13, color: 'var(--text-muted)' }}>No hay partidos para hoy.</p>
-        )}
-        {matches.map((m, i) => (
+      {/* Partidos de hoy y mañana */}
+      {(() => {
+        const todayStr = new Date().toLocaleDateString('en-CA')
+        const tmr = new Date(); tmr.setDate(tmr.getDate() + 1)
+        const tomorrowStr = tmr.toLocaleDateString('en-CA')
+        const todayM = matches.filter(m => m.matchDate === todayStr)
+        const tomorrowM = matches.filter(m => m.matchDate === tomorrowStr)
+
+        const renderMatchList = (list) => list.length === 0
+          ? <p style={{ padding: 16, fontSize: 13, color: 'var(--text-muted)' }}>No hay partidos.</p>
+          : list.map((m, i) => (
           <div key={m.id} style={{
             padding: '14px 16px',
-            borderBottom: i < matches.length - 1 ? '1px solid var(--border)' : 'none',
+            borderBottom: i < list.length - 1 ? '1px solid var(--border)' : 'none',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{
@@ -480,8 +495,8 @@ export default function AdminPage() {
                 {m.status || 'SCHEDULED'}
               </span>
               {m.orderInCourt && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>#{m.orderInCourt} · {m.court}</span>}
-              {m.deadlineForced && <span style={{ fontSize: 10, color: 'var(--danger)' }}>🔒 pronóstico cerrado</span>}
-              {m.result && <span style={{ fontSize: 10, color: G, fontWeight: 700 }}>· ✓ score</span>}
+              {m.deadlineForced && <span style={{ fontSize: 10, color: 'var(--danger)' }}>cerrado</span>}
+              {m.result && <span style={{ fontSize: 10, color: G, fontWeight: 700 }}>· score</span>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ flex: 1 }}>
@@ -504,48 +519,65 @@ export default function AdminPage() {
               }}>✕</button>
             </div>
 
-            {/* FIX Req 3: Acciones del admin — separar cierre de pronóstico de inicio de partido */}
             {m.status === 'SCHEDULED' && (
               <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                 {!m.deadlineForced && (
                   <button onClick={() => forceDeadline(m.id)} style={statusBtnStyle('var(--danger)')}>
-                    🔒 Solo cerrar pronóstico
+                    Cerrar pronóstico
                   </button>
                 )}
                 {m.deadlineForced && (
                   <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('var(--green-mid)')}>
-                    ▶ Iniciar partido
+                    Iniciar partido
                   </button>
                 )}
                 <button onClick={() => forceStart(m.id)} style={statusBtnStyle('#C62828')} disabled={m.deadlineForced}>
-                  🔒 Cerrar + Empezar
+                  Cerrar + Empezar
                 </button>
               </div>
             )}
             {m.status === 'IN_PLAY' && (
               <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                 <button onClick={() => setLiveModal(m)} style={statusBtnStyle('#1565C0')}>
-                  📊 Score en vivo
+                  Score en vivo
                 </button>
                 <button onClick={() => setModal(m)} style={statusBtnStyle(G)}>
-                  ✓ Finalizar
+                  Finalizar
                 </button>
                 <button onClick={() => changeStatus(m.id, 'SUSPENDED')} style={statusBtnStyle('#FF9800')}>
-                  ⏸ Suspender
+                  Suspender
                 </button>
               </div>
             )}
             {m.status === 'SUSPENDED' && (
               <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                 <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('var(--danger)')}>
-                  ▶ Reanudar
+                  Reanudar
                 </button>
-                <button onClick={() => setModal(m)} style={statusBtnStyle(G)}>✓ Finalizar</button>
+                <button onClick={() => setModal(m)} style={statusBtnStyle(G)}>Finalizar</button>
               </div>
             )}
           </div>
-        ))}
-      </div>
+        ))
+
+        return (
+          <>
+            <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+              Hoy ({todayM.length})
+            </h3>
+            <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
+              {renderMatchList(todayM)}
+            </div>
+
+            <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+              Manana ({tomorrowM.length})
+            </h3>
+            <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
+              {renderMatchList(tomorrowM)}
+            </div>
+          </>
+        )
+      })()}
 
       {/* Cuadro del torneo */}
       <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>

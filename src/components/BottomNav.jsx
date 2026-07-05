@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 const TABS = [
   { path: '/',       label: 'Hoy' },
   { path: '/tabla',  label: 'Tabla' },
-  { path: '/ligas',  label: 'Ligas' },
+  
   { path: '/bracket',label: 'Cuadro' },
   { path: '/ranking',label: 'Ranking' },
 ]
