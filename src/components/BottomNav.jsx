@@ -6,6 +6,7 @@ const TABS = [
   { path: '/',       label: 'Hoy' },
   { path: '/tabla',  label: 'Tabla' },
   { path: '/bracket',label: 'Cuadro' },
+  { path: '/ranking',label: 'Ranking' },
 ]
 const ADMIN_TAB = { path: '/admin', label: 'Admin' }
 
@@ -28,11 +29,11 @@ export default function BottomNav() {
         const active = pathname === t.path
         return (
           <button key={t.path} onClick={() => navigate(t.path)} style={{
-            flex: 1, padding: '10px 4px 8px', border: 'none', background: 'none',
+            flex: 1, padding: '12px 4px 10px', border: 'none', background: 'none',
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
             alignItems: 'center', gap: 3,
             color: active ? 'var(--green)' : 'var(--text-muted)',
-            fontSize: 10, fontWeight: active ? 700 : 500,
+            fontSize: 13, fontWeight: active ? 700 : 500,
           }}>
             {t.label}
           </button>

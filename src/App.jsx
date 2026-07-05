@@ -8,6 +8,7 @@ import TablaPage    from './pages/TablaPage.jsx'
 import HistorialPage from './pages/HistorialPage.jsx'
 import TorneoPage   from './pages/TorneoPage.jsx'
 import BracketPage  from './pages/BracketPage.jsx'
+import RankingPage  from './pages/RankingPage.jsx'
 import AdminPage    from './pages/AdminPage.jsx'
 import BottomNav    from './components/BottomNav.jsx'
 import TopBar       from './components/TopBar.jsx'
@@ -30,6 +31,7 @@ function AppShell() {
           <Route path="/tabla"       element={<TablaPage />} />
           <Route path="/historial/:userId" element={<HistorialPage />} />
           <Route path="/torneo"      element={<TorneoPage />} />
+          <Route path="/ranking"     element={<RankingPage />} />
           {user.role === 'ADMIN' && <Route path="/admin" element={<AdminPage />} />}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
