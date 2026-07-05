@@ -10,6 +10,7 @@ export default function TablaPage() {
   const [lb, setLb] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentUserId, setCurrentUserId] = useState(null)
+  const [hasTorneoPick, setHasTorneoPick] = useState(null)
 
   useEffect(() => {
     // Cargar tabla + id del usuario logueado (sacado del localStorage)
@@ -25,7 +26,6 @@ export default function TablaPage() {
     api.get('/leaderboard')
       .then(r => {
         setLb(r.data)
-        // Si no pudimos obtener el id por email, intentamos matchear por name
         const stored2 = localStorage.getItem('wim_user')
         if (stored2) {
           const u = JSON.parse(stored2)
@@ -34,6 +34,14 @@ export default function TablaPage() {
         }
       })
       .catch(console.error)
+
+    // Verificar si el usuario ya hizo su pick de torneo
+    api.get('/tournament/my-pick')
+      .then(r => {
+        const pick = r.data
+        setHasTorneoPick(!!(pick?.champion))
+      })
+      .catch(() => setHasTorneoPick(false))
       .finally(() => setLoading(false))
   }, [])
 
@@ -120,6 +128,23 @@ export default function TablaPage() {
               )
             })}
           </div>
+
+          {/* Botón Torneo para quienes no hicieron pick */}
+          {hasTorneoPick === false && (
+            <div style={{ textAlign: 'center', marginBottom: 12 }}>
+              <button
+                onClick={() => navigate('/torneo')}
+                style={{
+                  background: 'var(--purple)', border: 'none', color: 'white',
+                  fontSize: 13, fontWeight: 600, padding: '12px 20px',
+                  borderRadius: 10, cursor: 'pointer', width: '100%',
+                  boxShadow: '0 2px 8px rgba(103,58,183,.3)',
+                }}
+              >
+                Hacé tu pronóstico de Torneo
+              </button>
+            </div>
+          )}
 
           {/* Botón acceso rápido a mi historial */}
           {currentUserId != null && (

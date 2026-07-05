@@ -3,19 +3,18 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
 const TABS = [
-  { path: '/',       icon: '📋', label: 'Hoy' },
-  { path: '/bracket',icon: '🏆', label: 'Cuadro' },
-  { path: '/tabla',  icon: '🏅', label: 'Tabla' },
-  { path: '/torneo', icon: '🎯', label: 'Torneo' },
+  { path: '/',       label: 'Hoy' },
+  { path: '/tabla',  label: 'Tabla' },
+  { path: '/bracket',label: 'Cuadro' },
 ]
-const ADMIN_TAB = { path: '/admin', icon: '⚙️', label: 'Admin' }
+const ADMIN_TAB = { path: '/admin', label: 'Admin' }
 
 export default function BottomNav() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { user } = useAuth()
   const tabs = user?.role === 'ADMIN' 
-    ? TABS.filter(t => t.path !== '/torneo').concat(ADMIN_TAB) 
+    ? [...TABS, ADMIN_TAB] 
     : TABS
 
   return (
@@ -35,7 +34,6 @@ export default function BottomNav() {
             color: active ? 'var(--green)' : 'var(--text-muted)',
             fontSize: 10, fontWeight: active ? 700 : 500,
           }}>
-            <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>
             {t.label}
           </button>
         )
