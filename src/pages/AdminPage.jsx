@@ -390,12 +390,12 @@ export default function AdminPage() {
   }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2 style={{ marginBottom: 4 }}>Panel de administrador</h2>
-      <p className="text-muted mb-16">Gestión de partidos y resultados</p>
+    <div style={{ padding: '20px 16px' }}>
+      <h2 style={{ marginBottom: 6, fontSize: 20 }}>Panel de administrador</h2>
+      <p className="text-muted" style={{ marginBottom: 20, fontSize: 13 }}>Gestión de partidos y resultados</p>
 
       {/* Sync + Agregar partido */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
         <button className="btn btn-primary" style={{ flex: 1, background: syncing === 'tomorrow' ? 'var(--text-muted)' : 'var(--green-mid)' }}
           onClick={syncTomorrow} disabled={syncing !== null}>
           {syncing === 'tomorrow' ? 'Sincronizando...' : 'Sincronizar y Añadir'}
@@ -408,8 +408,8 @@ export default function AdminPage() {
 
       {/* Add match form — oculto hasta que apriete el botón */}
       {showAddForm && (
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+      <div className="card" style={{ marginBottom: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
           <div>
             <label>Fecha</label>
             <input type="date" value={newMatch.matchDate}
@@ -421,21 +421,21 @@ export default function AdminPage() {
               onChange={e => setNewMatch(n => ({ ...n, matchTime: e.target.value }))} />
           </div>
         </div>
-        <div style={{ marginBottom: 8 }}>
+        <div style={{ marginBottom: 12 }}>
           <label>Cancha</label>
           <select value={newMatch.court}
             onChange={e => setNewMatch(n => ({ ...n, court: e.target.value, followsMatchId: '' }))}>
             {COURTS.map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
-        <div style={{ marginBottom: 8 }}>
+        <div style={{ marginBottom: 12 }}>
           <label>Ronda</label>
           <select value={newMatch.round}
             onChange={e => setNewMatch(n => ({ ...n, round: e.target.value }))}>
             {ROUNDS.map(r => <option key={r}>{r}</option>)}
           </select>
         </div>
-        <div style={{ marginBottom: 8 }}>
+        <div style={{ marginBottom: 12 }}>
           <label>¿Sigue a otro partido en la misma cancha?</label>
           <select value={newMatch.followsMatchId}
             onChange={e => setNewMatch(n => ({ ...n, followsMatchId: e.target.value }))}>
@@ -445,12 +445,12 @@ export default function AdminPage() {
             ))}
           </select>
         </div>
-        <div style={{ marginBottom: 8 }}>
+        <div style={{ marginBottom: 12 }}>
           <label>Jugador 1</label>
           <input type="text" placeholder="Escribí el nombre completo" value={newMatch.player1}
             onChange={e => setNewMatch(n => ({ ...n, player1: e.target.value }))} />
         </div>
-        <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 14 }}>
           <label>Jugador 2</label>
           <input type="text" placeholder="Escribí el nombre completo" value={newMatch.player2}
             onChange={e => setNewMatch(n => ({ ...n, player2: e.target.value }))} />
@@ -460,16 +460,16 @@ export default function AdminPage() {
       )}
 
       {/* Today's matches */}
-      <h3 style={{ marginBottom: 10, fontSize: 14, color: '#888', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+      <h3 style={{ marginBottom: 12, fontSize: 14, color: '#888', textTransform: 'uppercase', letterSpacing: '.06em' }}>
         Partidos de hoy ({matches.length})
       </h3>
-      <div className="card" style={{ marginBottom: 16, padding: 0, overflow: 'hidden' }}>
+      <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
         {matches.length === 0 && (
           <p style={{ padding: 16, fontSize: 13, color: '#888' }}>No hay partidos para hoy.</p>
         )}
         {matches.map((m, i) => (
           <div key={m.id} style={{
-            padding: '11px 14px',
+            padding: '14px 16px',
             borderBottom: i < matches.length - 1 ? '1px solid var(--border)' : 'none',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -506,7 +506,7 @@ export default function AdminPage() {
 
             {/* FIX Req 3: Acciones del admin — separar cierre de pronóstico de inicio de partido */}
             {m.status === 'SCHEDULED' && (
-              <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                 {!m.deadlineForced && (
                   <button onClick={() => forceDeadline(m.id)} style={statusBtnStyle('var(--danger)')}>
                     🔒 Solo cerrar pronóstico
@@ -523,7 +523,7 @@ export default function AdminPage() {
               </div>
             )}
             {m.status === 'IN_PLAY' && (
-              <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                 <button onClick={() => setLiveModal(m)} style={statusBtnStyle('#1565C0')}>
                   📊 Score en vivo
                 </button>
@@ -536,7 +536,7 @@ export default function AdminPage() {
               </div>
             )}
             {m.status === 'SUSPENDED' && (
-              <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
                 <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('var(--danger)')}>
                   ▶ Reanudar
                 </button>
@@ -548,10 +548,10 @@ export default function AdminPage() {
       </div>
 
       {/* Cuadro del torneo */}
-      <h3 style={{ marginBottom: 10, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+      <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
         Cuadro del torneo
       </h3>
-      <div className="card" style={{ marginBottom: 16 }}>
+      <div className="card" style={{ marginBottom: 24 }}>
         {bracketLoading ? (
           <div className="spinner" />
         ) : bracketError ? (
@@ -635,10 +635,10 @@ export default function AdminPage() {
       </div>
 
       {/* Tournament result */}
-      <h3 style={{ marginBottom: 10, fontSize: 14, color: '#888', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+      <h3 style={{ marginBottom: 12, fontSize: 14, color: '#888', textTransform: 'uppercase', letterSpacing: '.06em' }}>
         Resultado del torneo
       </h3>
-      <div className="card" style={{ marginBottom: 16 }}>
+      <div className="card" style={{ marginBottom: 24 }}>
         <div style={{ marginBottom: 10 }}>
           <label>Campeón real</label>
           <input type="text" placeholder="Nombre del campeón" value={tResult.champion || ''}
@@ -671,9 +671,9 @@ export default function AdminPage() {
 
 function statusBtnStyle(color) {
   return {
-    padding: '4px 8px', fontSize: 10, fontWeight: 600,
+    padding: '6px 10px', fontSize: 11, fontWeight: 600,
     background: color, color: '#fff', border: 'none',
-    borderRadius: 5, cursor: 'pointer',
+    borderRadius: 6, cursor: 'pointer',
   }
 }
 
