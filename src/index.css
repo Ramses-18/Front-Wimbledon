@@ -7,6 +7,7 @@
   --green-mid:    #2E7D32;
   --green-light:  #E8F5E9;
   --green-pale:   #F1F8F1;
+  --green-input:  rgba(46,125,50,0.12);
   --purple:       #4A148C;
   --purple-light: #EDE7F6;
   --gold:         #C9A84C;
@@ -40,6 +41,7 @@
   --green-mid:    #388E3C;
   --green-light:  #0d2818;
   --green-pale:   #142a1c;
+  --green-input:  rgba(46,125,50,0.25);
   --purple:       #9C27B0;
   --purple-light: #2a0a3a;
   --gold:         #E6C870;

@@ -81,7 +81,7 @@ function ResultModal({ match, onClose, onSaved }) {
           </span>
         </p>
 
-        <div style={{ fontSize: 12, color: '#888', marginBottom: 6 }}>Ganador</div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>Ganador</div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
           {[match.player1, match.player2].map(p => (
             <button key={p} onClick={() => setForm(f => ({ ...f, winner: p }))} style={{
@@ -98,18 +98,18 @@ function ResultModal({ match, onClose, onSaved }) {
 
         {form.winner && (
           <>
-            <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>Resultado por set</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Resultado por set</div>
             <div style={{ display: 'grid', gridTemplateColumns: '60px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
               <div />
               {['Set 1','Set 2','Set 3','Set 4','Set 5'].map(s => (
-                <div key={s} style={{ fontSize: 9, color: '#888', textAlign: 'center', fontWeight: 600 }}>{s}</div>
+                <div key={s} style={{ fontSize: 9, color: 'var(--text-muted)', textAlign: 'center', fontWeight: 600 }}>{s}</div>
               ))}
             </div>
             {['w','l'].map((side) => (
               <div key={side} style={{ display: 'grid', gridTemplateColumns: '60px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
                 <div style={{
                   fontSize: 10, fontWeight: 600,
-                  color: side === 'w' ? G : '#888',
+                  color: side === 'w' ? G : 'var(--text-muted)',
                   display: 'flex', alignItems: 'center', overflow: 'hidden',
                 }}>
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -125,14 +125,14 @@ function ResultModal({ match, onClose, onSaved }) {
                       height: 32, borderRadius: 5, textAlign: 'center',
                       fontSize: 13, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
                       border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : 'var(--border)'}`,
-                      background: s[side] !== '' && side === 'w' ? 'var(--green-light)' : 'var(--cream)',
+                      background: s[side] !== '' && side === 'w' ? 'rgba(46,125,50,0.18)' : 'var(--input-bg)',
                       color: s[side] !== '' ? (side === 'w' ? G : 'var(--text-mid)') : 'var(--text-muted)',
                     }}
                   />
                 ))}
               </div>
             ))}
-            <div style={{ fontSize: 11, color: '#888', marginTop: 8, marginBottom: 14 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8, marginBottom: 14 }}>
               Sets: <strong>{countSetsWinner().setsWinner ?? 0}-{countSetsWinner().setsLoser ?? 0}</strong>
             </div>
           </>
@@ -197,14 +197,14 @@ function LiveScoreModal({ match, onClose, onSaved }) {
         <div style={{ display: 'grid', gridTemplateColumns: '60px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
           <div />
           {['Set 1','Set 2','Set 3','Set 4','Set 5'].map(s => (
-            <div key={s} style={{ fontSize: 9, color: '#888', textAlign: 'center', fontWeight: 600 }}>{s}</div>
+            <div key={s} style={{ fontSize: 9, color: 'var(--text-muted)', textAlign: 'center', fontWeight: 600 }}>{s}</div>
           ))}
         </div>
         {['w','l'].map((side) => (
           <div key={side} style={{ display: 'grid', gridTemplateColumns: '60px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
             <div style={{
               fontSize: 10, fontWeight: 600,
-              color: side === 'w' ? G : '#888',
+              color: side === 'w' ? G : 'var(--text-muted)',
               display: 'flex', alignItems: 'center', overflow: 'hidden',
             }}>
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -218,7 +218,7 @@ function LiveScoreModal({ match, onClose, onSaved }) {
                   height: 32, borderRadius: 5, textAlign: 'center',
                   fontSize: 13, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
                   border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : 'var(--border)'}`,
-                  background: s[side] !== '' && side === 'w' ? 'var(--green-light)' : 'var(--cream)',
+                  background: s[side] !== '' && side === 'w' ? 'rgba(46,125,50,0.18)' : 'var(--input-bg)',
                   color: s[side] !== '' ? (side === 'w' ? G : 'var(--text-mid)') : 'var(--text-muted)',
                 }}
               />
@@ -460,12 +460,12 @@ export default function AdminPage() {
       )}
 
       {/* Today's matches */}
-      <h3 style={{ marginBottom: 12, fontSize: 14, color: '#888', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+      <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
         Partidos de hoy ({matches.length})
       </h3>
       <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
         {matches.length === 0 && (
-          <p style={{ padding: 16, fontSize: 13, color: '#888' }}>No hay partidos para hoy.</p>
+          <p style={{ padding: 16, fontSize: 13, color: 'var(--text-muted)' }}>No hay partidos para hoy.</p>
         )}
         {matches.map((m, i) => (
           <div key={m.id} style={{
@@ -475,18 +475,18 @@ export default function AdminPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{
                 fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                background: STATUS_COLORS[m.status] || '#888', color: '#fff',
+                background: STATUS_COLORS[m.status] || 'var(--text-muted)', color: '#fff',
               }}>
                 {m.status || 'SCHEDULED'}
               </span>
-              {m.orderInCourt && <span style={{ fontSize: 10, color: '#888' }}>#{m.orderInCourt} · {m.court}</span>}
+              {m.orderInCourt && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>#{m.orderInCourt} · {m.court}</span>}
               {m.deadlineForced && <span style={{ fontSize: 10, color: 'var(--danger)' }}>🔒 pronóstico cerrado</span>}
               {m.result && <span style={{ fontSize: 10, color: G, fontWeight: 700 }}>· ✓ score</span>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{m.player1} vs {m.player2}</div>
-                <div style={{ fontSize: 11, color: '#888' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                   {m.matchTime ? `${m.matchTime.slice(0,5)} hs` : 'Sin horario'} · {m.round}
                 </div>
               </div>
@@ -635,7 +635,7 @@ export default function AdminPage() {
       </div>
 
       {/* Tournament result */}
-      <h3 style={{ marginBottom: 12, fontSize: 14, color: '#888', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+      <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
         Resultado del torneo
       </h3>
       <div className="card" style={{ marginBottom: 24 }}>
@@ -838,7 +838,7 @@ function BracketEditorModal({ match, onClose, onSaved }) {
                     height: 34, borderRadius: 5, textAlign: 'center',
                     fontSize: 14, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
                     border: `0.5px solid ${s.w !== '' ? G : 'var(--border)'}`,
-                    background: s.w !== '' ? 'var(--green-light)' : 'var(--cream)',
+                    background: s.w !== '' ? 'rgba(46,125,50,0.18)' : 'var(--input-bg)',
                     color: s.w !== '' ? G : 'var(--text-muted)',
                   }}
                 />
@@ -861,7 +861,7 @@ function BracketEditorModal({ match, onClose, onSaved }) {
                     height: 34, borderRadius: 5, textAlign: 'center',
                     fontSize: 14, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
                     border: `0.5px solid ${s.l !== '' ? 'var(--border)' : 'var(--border)'}`,
-                    background: 'var(--cream)',
+                    background: 'var(--input-bg)',
                     color: s.l !== '' ? 'var(--text-mid)' : 'var(--text-muted)',
                   }}
                 />
