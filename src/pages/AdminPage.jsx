@@ -152,9 +152,12 @@ function ResultModal({ match, onClose, onSaved }) {
             <label style={{
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13,
             }}>
-              <input type="checkbox" checked={form.retired}
-                onChange={e => setForm(f => ({ ...f, retired: e.target.checked }))
-                style={{ width: 18, height: 18, accentColor: '#9C27B0' }} />
+              <input
+                type="checkbox"
+                checked={form.retired}
+                onChange={e => setForm(f => ({ ...f, retired: e.target.checked }))}
+                style={{ width: 18, height: 18, accentColor: '#9C27B0' }}
+              />
               <div>
                 <div style={{ fontWeight: 600, color: form.retired ? '#9C27B0' : 'var(--text)' }}>
                   Un jugador se retiró
