@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { api } from '../context/AuthContext.jsx'
+import { api, useAuth } from '../context/AuthContext.jsx'
 import { useToast } from '../context/ToastContext.jsx'
 
 const G      = 'var(--green)'
@@ -143,6 +143,8 @@ export default function MatchCard({ match, status, onRefresh }) {
   const [editing, setEditing] = useState(false)
   const [showModal, setShowModal] = useState(false)
 
+  const { user: authUser } = useAuth()
+  const isAdmin = authUser?.role === 'ADMIN'
   const pick = match.myPick
   const res  = match.result
 
@@ -327,7 +329,7 @@ export default function MatchCard({ match, status, onRefresh }) {
             <div>
               <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Cierre de pronóstico</div>
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--danger)' }}>
-                Cerrado por el admin
+                Cerrado
               </div>
             </div>
             <span style={{
@@ -356,7 +358,8 @@ export default function MatchCard({ match, status, onRefresh }) {
           </div>
         </div>
 
-        {/* Pick zone */}
+        {/* Pick zone — ocultar para admin */}
+        {!isAdmin && (
         <div style={{ padding: '10px 12px 12px', borderTop: `1px dashed ${BORDER}`, marginTop: 10 }}>
           <div style={{ fontSize: 9, fontWeight: 700, color: GM, textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 6 }}>
             Tu pronóstico
@@ -467,7 +470,7 @@ export default function MatchCard({ match, status, onRefresh }) {
                       fontSize: 11, color: 'var(--danger)', textAlign: 'center',
                       padding: '5px 0', fontWeight: 500,
                     }}>
-                      Plazo cerrado por el admin · pronóstico guardado
+                      Plazo cerrado · pronóstico guardado
                     </div>
                   )}
                 </>
@@ -476,7 +479,7 @@ export default function MatchCard({ match, status, onRefresh }) {
               {/* Sin pick y cerrado */}
               {!pick && closed && (
                 <p style={{ fontSize: 12, color: 'var(--danger)', fontWeight: 500 }}>
-                  Plazo cerrado por el admin · No enviaste pronóstico
+                  Plazo cerrado · No enviaste pronóstico
                 </p>
               )}
 
@@ -562,6 +565,7 @@ export default function MatchCard({ match, status, onRefresh }) {
             </>
           )}
         </div>
+        )}
       </div>
 
       {showModal && (

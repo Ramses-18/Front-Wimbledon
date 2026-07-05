@@ -507,9 +507,6 @@ export default function AdminPage() {
                 <button onClick={() => forceStart(m.id)} style={statusBtnStyle('#C62828')} disabled={m.deadlineForced}>
                   🔒 Cerrar + Empezar
                 </button>
-                <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('var(--green-mid)')}>
-                  ▶ Solo iniciar
-                </button>
               </div>
             )}
             {m.status === 'IN_PLAY' && (
