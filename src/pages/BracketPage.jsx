@@ -37,7 +37,7 @@ export default function BracketPage() {
       }
     } catch (e) {
       console.error(e)
-      setError('No se pudo cargar el bracket. Es probable que el admin aún no lo haya inicializado.')
+      setError('No se pudo cargar el cuadro. Es probable que el admin aún no lo haya inicializado.')
     } finally {
       setLoading(false)
     }
@@ -50,11 +50,11 @@ export default function BracketPage() {
   if (error || !bracket) {
     return (
       <div style={{ padding: 16 }}>
-        <h1 style={{ fontFamily: 'Georgia,serif', fontSize: 22, marginBottom: 4 }}>Bracket del torneo</h1>
+        <h1 style={{ fontFamily: 'Georgia,serif', fontSize: 22, marginBottom: 4 }}>Cuadro del torneo</h1>
         <p className="text-muted mb-12">Cuadro completo · Singles Masculino</p>
         <div className="empty-state">
           <div className="icon">🏆</div>
-          <p>{error || 'Bracket no disponible.'}</p>
+          <p>{error || 'Cuadro no disponible.'}</p>
         </div>
       </div>
     )
@@ -75,7 +75,7 @@ export default function BracketPage() {
 
   return (
     <div style={{ padding: 16 }}>
-      <h1 style={{ fontFamily: 'Georgia,serif', fontSize: 22, marginBottom: 2 }}>Bracket del torneo</h1>
+      <h1 style={{ fontFamily: 'Georgia,serif', fontSize: 22, marginBottom: 2 }}>Cuadro del torneo</h1>
       <p className="text-muted mb-12">Cuadro completo · Singles Masculino</p>
 
       {/* Campeón */}

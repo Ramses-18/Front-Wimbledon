@@ -247,6 +247,7 @@ export default function AdminPage() {
   })
   const [savingT, setSavingT] = useState(false)
   const [syncing, setSyncing] = useState(null)
+  const [showAddForm, setShowAddForm] = useState(false)
   // Bracket management
   const [bracket, setBracket] = useState(null)
   const [bracketLoading, setBracketLoading] = useState(true)
@@ -276,17 +277,17 @@ export default function AdminPage() {
       setBracket(data)
       setBracketError('')
     } catch (e) {
-      setBracketError('Error al cargar el bracket.')
+      setBracketError('Error al cargar el cuadro.')
     } finally {
       setBracketLoading(false)
     }
   }
 
   const initBracket = async () => {
-    if (!confirm('¿Inicializar el bracket? Esto crea 255 partidos vacíos (R128 → F). Solo se hace una vez.')) return
+    if (!confirm('¿Inicializar el cuadro? Esto crea 255 partidos vacíos (R128 → F). Solo se hace una vez.')) return
     try {
       await api.post('/bracket/init')
-      show('Bracket inicializado ✓')
+      show('Cuadro inicializado ✓')
       loadBracket()
     } catch (e) {
       show(e.response?.data?.error || 'Error al inicializar', 'error')
@@ -389,18 +390,20 @@ export default function AdminPage() {
       <h2 style={{ marginBottom: 4 }}>Panel de administrador</h2>
       <p className="text-muted mb-16">Gestión de partidos y resultados</p>
 
-      {/* Sync */}
+      {/* Sync + Agregar partido */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <button className="btn btn-primary" style={{ flex: 1, background: syncing === 'tomorrow' ? 'var(--text-muted)' : 'var(--green-mid)' }}
           onClick={syncTomorrow} disabled={syncing !== null}>
           {syncing === 'tomorrow' ? 'Sincronizando...' : '📅 Sync partidos de mañana'}
         </button>
+        <button className="btn btn-primary" style={{ flex: 1, background: showAddForm ? 'var(--danger)' : G }}
+          onClick={() => setShowAddForm(f => !f)}>
+          {showAddForm ? '✕ Cerrar' : '+ Agregar partido'}
+        </button>
       </div>
 
-      {/* Add match */}
-      <h3 style={{ marginBottom: 10, fontSize: 14, color: '#888', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-        Agregar partido
-      </h3>
+      {/* Add match form — oculto hasta que apriete el botón */}
+      {showAddForm && (
       <div className="card" style={{ marginBottom: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
           <div>
@@ -450,6 +453,7 @@ export default function AdminPage() {
         </div>
         <button className="btn btn-primary btn-full" onClick={addMatch}>+ Agregar partido</button>
       </div>
+      )}
 
       {/* Today's matches */}
       <h3 style={{ marginBottom: 10, fontSize: 14, color: '#888', textTransform: 'uppercase', letterSpacing: '.06em' }}>
@@ -504,6 +508,11 @@ export default function AdminPage() {
                     🔒 Solo cerrar pronóstico
                   </button>
                 )}
+                {m.deadlineForced && (
+                  <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('var(--green-mid)')}>
+                    ▶ Iniciar partido
+                  </button>
+                )}
                 <button onClick={() => forceStart(m.id)} style={statusBtnStyle('#C62828')} disabled={m.deadlineForced}>
                   🔒 Cerrar + Empezar
                 </button>
@@ -534,9 +543,9 @@ export default function AdminPage() {
         ))}
       </div>
 
-      {/* FIX Req 2: Bracket management mejorado */}
+      {/* Cuadro del torneo */}
       <h3 style={{ marginBottom: 10, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-        Bracket del torneo
+        Cuadro del torneo
       </h3>
       <div className="card" style={{ marginBottom: 16 }}>
         {bracketLoading ? (
@@ -545,16 +554,16 @@ export default function AdminPage() {
           <>
             <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>{bracketError}</p>
             <button className="btn btn-primary btn-full" onClick={initBracket}>
-              🔧 Inicializar bracket
+              🔧 Inicializar cuadro
             </button>
           </>
         ) : bracketEmpty ? (
           <>
             <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-              El bracket aún no tiene partidos. Inicializalo para crear la estructura completa (R128 → Final).
+              El cuadro aún no tiene partidos. Inicializalo para crear la estructura completa (R128 → Final).
             </p>
             <button className="btn btn-primary btn-full" onClick={initBracket}>
-              🔧 Inicializar bracket (255 partidos)
+              🔧 Inicializar cuadro (255 partidos)
             </button>
           </>
         ) : (
@@ -737,7 +746,7 @@ function BracketEditorModal({ match, onClose, onSaved }) {
         setsLoser: form.winner ? setsLoser : null,
         status: form.winner ? 'FINISHED' : 'SCHEDULED',
       })
-      show('Partido del bracket actualizado ✓')
+      show('Partido del cuadro actualizado ✓')
       onSaved()
     } catch (e) {
       show(e.response?.data?.error || 'Error.', 'error')

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 const TABS = [
   { path: '/',       icon: '📋', label: 'Hoy' },
-  { path: '/bracket',icon: '🏆', label: 'Bracket' },
+  { path: '/bracket',icon: '🏆', label: 'Cuadro' },
   { path: '/tabla',  icon: '🏅', label: 'Tabla' },
   { path: '/torneo', icon: '🎯', label: 'Torneo' },
 ]
@@ -14,7 +14,9 @@ export default function BottomNav() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { user } = useAuth()
-  const tabs = user?.role === 'ADMIN' ? [...TABS, ADMIN_TAB] : TABS
+  const tabs = user?.role === 'ADMIN' 
+    ? TABS.filter(t => t.path !== '/torneo').concat(ADMIN_TAB) 
+    : TABS
 
   return (
     <nav style={{
