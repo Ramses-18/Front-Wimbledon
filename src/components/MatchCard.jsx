@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { api, useAuth } from '../context/AuthContext.jsx'
 import { useToast } from '../context/ToastContext.jsx'
+import Confetti from './Confetti.jsx'
 
 const G      = 'var(--green)'
 const GM     = 'var(--green-mid)'
@@ -142,11 +143,22 @@ export default function MatchCard({ match, status, onRefresh }) {
   const [busy, setBusy]       = useState(false)
   const [editing, setEditing] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [confettiKey, setConfettiKey] = useState(0)
+  const prevPtsRef = React.useRef(0)
 
   const { user: authUser } = useAuth()
   const isAdmin = authUser?.role === 'ADMIN'
   const pick = match.myPick
   const res  = match.result
+
+  // Detectar si el usuario acaba de recibir puntos (resultado recién cargado)
+  const currentPts = pick?.pointsEarned || 0
+  useEffect(() => {
+    if (prevPtsRef.current === 0 && currentPts > 0 && status === 'terminado') {
+      setConfettiKey(k => k + 1)
+    }
+    prevPtsRef.current = currentPts
+  }, [currentPts, status])
 
   // FIX Req 3: El deadline ahora es 100% manual — solo deadlineForced del admin
   const closed = match.deadlineForced === true
@@ -571,6 +583,8 @@ export default function MatchCard({ match, status, onRefresh }) {
       {showModal && (
         <PickDetailModal match={match} pick={pick} onClose={() => setShowModal(false)} />
       )}
+
+      <Confetti trigger={confettiKey} />
     </>
   )
 }

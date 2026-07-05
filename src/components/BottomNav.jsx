@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 const TABS = [
   { path: '/',       label: 'Hoy' },
   { path: '/tabla',  label: 'Tabla' },
+  { path: '/ligas',  label: 'Ligas' },
   { path: '/bracket',label: 'Cuadro' },
   { path: '/ranking',label: 'Ranking' },
 ]
@@ -26,14 +27,14 @@ export default function BottomNav() {
       display: 'flex', zIndex: 100,
     }}>
       {tabs.map(t => {
-        const active = pathname === t.path
+        const active = pathname === t.path || (t.path !== '/' && pathname.startsWith(t.path))
         return (
           <button key={t.path} onClick={() => navigate(t.path)} style={{
-            flex: 1, padding: '0 4px', border: 'none', background: 'none',
+            flex: 1, padding: '0 2px', border: 'none', background: 'none',
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center', height: 52,
             color: active ? 'var(--green)' : 'var(--text-muted)',
-            fontSize: 13, fontWeight: active ? 700 : 500,
+            fontSize: 11, fontWeight: active ? 700 : 500,
           }}>
             {t.label}
           </button>
