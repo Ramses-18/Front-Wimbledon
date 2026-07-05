@@ -13,11 +13,6 @@ const steps = [
     desc: 'Ganador correcto: +1 punto. Sets correctos: +3 puntos. Resultado exacto set a set: +10 puntos. Usá tu corrección diaria si te equivocaste.',
   },
   {
-    icon: '👥',
-    title: 'Competí en ligas',
-    desc: 'Creá o uníte a una liga privada con amigos usando un código. Compará sus pronósticos en una tabla exclusiva.',
-  },
-  {
     icon: '🔔',
     title: 'No te pierdas nada',
     desc: 'Activá las notificaciones push para saber cuándo empieza un partido de tu pick y cuando se cargan resultados.',
