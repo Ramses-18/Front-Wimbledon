@@ -170,6 +170,11 @@ function BracketMatchCard({ match, onClick }) {
   const bg = isLive ? 'var(--danger-bg)' : isFinished ? 'var(--green-pale)' : 'var(--card-bg)'
   const border = isLive ? 'var(--danger)' : isFinished ? 'var(--green-mid)' : 'var(--border)'
 
+  // Parsear scoreStr en sets individuales
+  const sets = match.scoreStr
+    ? match.scoreStr.split(',').map(s => s.trim()).filter(Boolean)
+    : []
+
   return (
     <div onClick={onClick} style={{
       background: bg, border: `1px solid ${border}`, borderRadius: 8,
@@ -180,9 +185,9 @@ function BracketMatchCard({ match, onClick }) {
     onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <PlayerRow name={match.player1} winner={match.winner === match.player1} score={match.scoreStr} />
+          <PlayerRow name={match.player1} winner={match.winner === match.player1} sets={sets} isWinnerSide={match.winner === match.player1} />
           <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', padding: '1px 0', fontWeight: 700 }}>VS</div>
-          <PlayerRow name={match.player2} winner={match.winner === match.player2} />
+          <PlayerRow name={match.player2} winner={match.winner === match.player2} sets={sets} isWinnerSide={match.winner === match.player2} />
         </div>
         {isLive && (
           <span style={{
@@ -192,6 +197,13 @@ function BracketMatchCard({ match, onClick }) {
             <span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', background: 'var(--danger)', marginRight: 4, animation: 'spin 1s infinite' }}></span>
             LIVE
           </span>
+        )}
+        {isFinished && (
+          <span style={{
+            marginLeft: 8, fontSize: 10, fontWeight: 700,
+            padding: '2px 7px', borderRadius: 10,
+            background: 'var(--green-light)', color: G, whiteSpace: 'nowrap',
+          }}>{match.setsWinner ?? 0}-{match.setsLoser ?? 0}</span>
         )}
       </div>
       {match.player1 === null && match.player2 === null && (
@@ -203,7 +215,7 @@ function BracketMatchCard({ match, onClick }) {
   )
 }
 
-function PlayerRow({ name, winner, score }) {
+function PlayerRow({ name, winner, sets, isWinnerSide }) {
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -216,8 +228,28 @@ function PlayerRow({ name, winner, score }) {
       }}>
         {winner ? '✓ ' : ''}{name || 'Por definir'}
       </span>
-      {score && winner && (
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{score.split(',')[0]}</span>
+      {sets.length > 0 && (
+        <div style={{ display: 'flex', gap: 2, marginLeft: 6 }}>
+          {sets.map((s, i) => {
+            const parts = s.split('-')
+            const wScore = parts[0]?.trim()
+            const lScore = parts[1]?.trim()
+            const wonSet = isWinnerSide
+              ? parseInt(wScore) > parseInt(lScore)
+              : parseInt(lScore) > parseInt(wScore)
+            return (
+              <span key={i} style={{
+                fontSize: 10, fontWeight: 700,
+                padding: '1px 4px', borderRadius: 3,
+                background: wonSet ? G : 'var(--cream)',
+                color: wonSet ? 'white' : 'var(--text-muted)',
+                border: `0.5px solid ${wonSet ? G : 'var(--border)'}`,
+              }}>
+                {isWinnerSide ? wScore : lScore}
+              </span>
+            )
+          })}
+        </div>
       )}
     </div>
   )

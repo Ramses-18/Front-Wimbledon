@@ -169,11 +169,15 @@ function LiveScoreModal({ match, onClose, onSaved }) {
         payload[`set${n}W`] = s.w !== '' ? parseInt(s.w) : null
         payload[`set${n}L`] = s.l !== '' ? parseInt(s.l) : null
       })
-      await api.patch(`/admin/matches/${match.id}/live-score`, payload)
+      console.log('[LiveScore] payload:', JSON.stringify(payload))
+      console.log('[LiveScore] patch url: /admin/matches/' + match.id + '/live-score')
+      const resp = await api.patch(`/admin/matches/${match.id}/live-score`, payload)
+      console.log('[LiveScore] response:', resp.status, resp.data)
       show('Score en vivo actualizado ✓')
       onSaved()
       onClose()
     } catch (e) {
+      console.error('[LiveScore] ERROR:', e.response?.status, e.response?.data, e.message)
       show(e.response?.data?.error || 'Error.', 'error')
     } finally { setSaving(false) }
   }
@@ -394,7 +398,7 @@ export default function AdminPage() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <button className="btn btn-primary" style={{ flex: 1, background: syncing === 'tomorrow' ? 'var(--text-muted)' : 'var(--green-mid)' }}
           onClick={syncTomorrow} disabled={syncing !== null}>
-          {syncing === 'tomorrow' ? 'Sincronizando...' : '📅 Sync partidos de mañana'}
+          {syncing === 'tomorrow' ? 'Sincronizando...' : 'Sincronizar y Añadir'}
         </button>
         <button className="btn btn-primary" style={{ flex: 1, background: showAddForm ? 'var(--danger)' : G }}
           onClick={() => setShowAddForm(f => !f)}>
