@@ -347,14 +347,14 @@ export default function MatchCard({ match, status, onRefresh }) {
             <span style={{ fontSize: 14, fontWeight: 600, color: res?.winner === match.player1 ? G : 'var(--text)' }}>
               {match.player1}{res?.winner === match.player1 ? ' ✓' : ''}
             </span>
-            <ScoreBoxes isWinner={res?.winner === match.player1} />
+            <ScoreBoxes isWinner={res?.winner ? res.winner === match.player1 : true} />
           </div>
           <div style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center', padding: '1px 0', fontWeight: 700, letterSpacing: '.05em' }}>VS</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0' }}>
             <span style={{ fontSize: 14, fontWeight: 600, color: res?.winner === match.player2 ? G : 'var(--text)' }}>
               {match.player2}{res?.winner === match.player2 ? ' ✓' : ''}
             </span>
-            <ScoreBoxes isWinner={res?.winner === match.player2} />
+            <ScoreBoxes isWinner={res?.winner ? res.winner === match.player2 : false} />
           </div>
         </div>
 
