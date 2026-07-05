@@ -217,11 +217,11 @@ export default function MatchCard({ match, status, onRefresh }) {
     setEditing(true)
   }
 
-  // FIX Req 1: Mostrar formulario si no hay pick y no cerró, o si está editando
-  const showForm = (!pick && !closed) || editing
+  // FIX Req 1: Mostrar formulario si no hay pick y no cerró, o si está editando. Nunca durante IN_PLAY.
+  const showForm = status !== 'jugando' && ((!pick && !closed) || editing)
 
-  // FIX Req 1: Permitir corrección durante IN_PLAY o terminado (si el admin cerró pero el usuario quiere corregir)
-  const canCorrect = closed && pick && !pick.isCorrection && status !== 'terminado'
+  // FIX Req 1: Permitir corrección solo si no está en juego, cerró, tiene pick sin corregir, y no terminó
+  const canCorrect = status !== 'jugando' && closed && pick && !pick.isCorrection && status !== 'terminado'
 
   // Cuadraditos de score
   const resultSets = (() => {
