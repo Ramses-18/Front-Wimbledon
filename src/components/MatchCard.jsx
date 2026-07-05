@@ -226,11 +226,15 @@ export default function MatchCard({ match, status, onRefresh }) {
   // Cuadraditos de score
   const resultSets = (() => {
     if (!res) return null
+    console.log('[MatchCard] match.id:', match.id, 'status:', match.status,
+      'result:', JSON.stringify(res), 'winner:', res.winner)
     const arr = []
     for (let i = 1; i <= 5; i++) {
       const w = res[`set${i}W`], l = res[`set${i}L`]
+      console.log(`[MatchCard] set${i}: w=${w} l=${l} -> include? ${w != null && l != null}`)
       if (w != null && l != null) arr.push({ w, l })
     }
+    console.log('[MatchCard] resultSets final:', JSON.stringify(arr))
     return arr.length > 0 ? arr : null
   })()
 
