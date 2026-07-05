@@ -85,12 +85,12 @@ export default function TablaPage() {
                   style={{
                     display: 'flex', alignItems: 'center',
                     padding: '14px 16px', gap: 14, cursor: 'pointer',
-                    borderBottom: i < lb.length - 1 ? '1px solid #F0F0F0' : 'none',
-                    background: isMe ? 'var(--green-pale)' : 'white',
+                    borderBottom: i < lb.length - 1 ? '1px solid var(--border)' : 'none',
+                    background: isMe ? 'var(--green-pale)' : 'var(--card-bg)',
                     transition: 'background .15s',
                   }}
                   onMouseEnter={e => { if (!isMe) e.currentTarget.style.background = 'var(--green-pale)' }}
-                  onMouseLeave={e => { if (!isMe) e.currentTarget.style.background = 'white' }}
+                  onMouseLeave={e => { if (!isMe) e.currentTarget.style.background = 'var(--card-bg)' }}
                 >
                   <div style={{
                     width: 28, height: 28, borderRadius: '50%',

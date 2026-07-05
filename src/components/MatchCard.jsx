@@ -493,7 +493,7 @@ export default function MatchCard({ match, status, onRefresh }) {
                         flex: 1, padding: '9px 6px',
                         border: `1px solid ${form.winner === p ? G : BORDER}`,
                         borderRadius: 7,
-                        background: form.winner === p ? G : 'white',
+                        background: form.winner === p ? G : 'var(--card-bg)',
                         color: form.winner === p ? 'white' : 'var(--text)',
                         fontSize: 13, fontWeight: 600, cursor: 'pointer',
                       }}>

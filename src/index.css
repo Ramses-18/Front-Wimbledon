@@ -173,7 +173,7 @@ label {
 }
 .alert-error   { background: var(--danger-bg); color: var(--danger); }
 .alert-success { background: var(--green-light); color: var(--green); }
-.alert-info    { background: #E3F2FD; color: #0D47A1; }
+.alert-info    { background: var(--green-light); color: var(--green); }
 
 /* ── Layout helpers ─────────────────────────────────────────────────── */
 .flex        { display: flex; }
