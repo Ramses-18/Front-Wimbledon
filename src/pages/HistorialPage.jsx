@@ -57,11 +57,11 @@ export default function HistorialPage() {
   const STATUS_COLORS = {
     'SCHEDULED':  { bg: 'var(--cream)', color: 'var(--text-muted)' },
     'IN_PLAY':    { bg: 'var(--danger-bg)', color: 'var(--danger)' },
-    'SUSPENDED':  { bg: '#FFF3E0', color: '#E65100' },
+    'SUSPENDED':  { bg: 'var(--gold-bg)', color: '#FF9800' },
     'FINISHED':   { bg: 'var(--green-light)', color: 'var(--green)' },
-    'WALKOVER':   { bg: '#F3E5F5', color: '#7B1FA2' },
-    'RETIRED':    { bg: '#F3E5F5', color: '#7B1FA2' },
-    'ABANDONED':  { bg: '#EFEBE9', color: '#5D4037' },
+    'WALKOVER':   { bg: 'var(--purple-light)', color: 'var(--purple)' },
+    'RETIRED':    { bg: 'var(--purple-light)', color: 'var(--purple)' },
+    'ABANDONED':  { bg: 'var(--danger-bg)', color: 'var(--danger)' },
   }
 
   return (
