@@ -14,14 +14,15 @@ function PickDetailModal({ match, pick, onClose }) {
 
   const pickSets = pick ? [1,2,3,4,5].map(i => ({
     w: pick[`set${i}W`], l: pick[`set${i}L`]
-  })).filter(s => s.w != null) : []
+  })).filter(s => s.w != null && s.w > 0) : []
 
   const resSets = res ? [1,2,3,4,5].map(i => ({
     w: res[`set${i}W`], l: res[`set${i}L`]
-  })).filter(s => s.w != null) : []
+  })).filter(s => s.w != null && s.w > 0) : []
 
   const winnerOk = pick && res && pick.winner?.toLowerCase() === res.winner?.toLowerCase()
   const setsOk   = winnerOk && pick.setsWinner != null && pick.setsWinner === res.setsWinner
+                    && pick.setsLoser != null && pick.setsLoser === res.setsLoser
   const exactOk  = pick?.pointsEarned >= 14
   const pts      = pick?.pointsEarned || 0
 
