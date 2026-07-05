@@ -61,7 +61,7 @@ export default function AuthPage() {
             <button key={t} onClick={() => { setTab(t); setError('') }} style={{
               flex: 1, padding: '11px', fontSize: 14, fontWeight: 600,
               border: 'none', cursor: 'pointer',
-              background: tab === t ? 'var(--green)' : 'white',
+              background: tab === t ? 'var(--green)' : 'var(--card-bg)',
               color: tab === t ? 'white' : 'var(--text-muted)',
             }}>
               {t === 'login' ? 'Ingresar' : 'Registrarse'}

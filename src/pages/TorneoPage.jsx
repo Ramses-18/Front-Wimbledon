@@ -20,7 +20,7 @@ function PlayerSelect({ label, value, onChange, disabled }) {
         {label}
       </label>
       <select value={value || ''} onChange={e => onChange(e.target.value)} disabled={disabled}
-        style={{ background: value ? '#EDE7F6' : 'white', borderColor: value ? P : 'var(--border)',
+        style={{ background: value ? 'var(--purple-light)' : 'var(--input-bg)', borderColor: value ? P : 'var(--border)',
           color: value ? P : 'var(--text-muted)', fontWeight: value ? 700 : 400 }}>
         <option value="">— Elegir jugador —</option>
         {PLAYERS.map(p => <option key={p} value={p}>{p}</option>)}
