@@ -683,7 +683,6 @@ function BracketEditorModal({ match, onClose, onSaved }) {
   const [form, setForm] = useState({
     player1: match.player1 || '',
     player2: match.player2 || '',
-    winner: match.winner || '',
     sets: [
       { w: '', l: '' },
       { w: '', l: '' },
@@ -727,7 +726,7 @@ function BracketEditorModal({ match, onClose, onSaved }) {
         }
       }
     })
-    return { setsWinner: w > 0 ? w : null, setsLoser: l > 0 ? l : null }
+    return { setsWinner: w, setsLoser: l }
   }
 
   const buildScoreStr = () => {
@@ -737,18 +736,32 @@ function BracketEditorModal({ match, onClose, onSaved }) {
       .join(', ')
   }
 
+  const filledSets = form.sets.filter(s => s.w !== '' && s.l !== '').length
+  const { setsWinner, setsLoser } = countSets()
+  // Auto-determinar ganador por sets
+  const autoWinner = setsWinner > setsLoser ? form.player1
+    : setsLoser > setsWinner ? form.player2
+    : ''
+
   const save = async () => {
+    if (filledSets === 0) {
+      show('Cargá al menos un set para guardar el resultado.', 'error')
+      return
+    }
+    if (setsWinner === setsLoser) {
+      show('El resultado debe tener un ganador claro en sets.', 'error')
+      return
+    }
     setSaving(true)
     try {
-      const { setsWinner, setsLoser } = countSets()
       await api.put(`/bracket/${match.id}`, {
         player1: form.player1 || null,
         player2: form.player2 || null,
-        winner: form.winner || null,
-        scoreStr: form.winner ? buildScoreStr() || null : null,
-        setsWinner: form.winner ? setsWinner : null,
-        setsLoser: form.winner ? setsLoser : null,
-        status: form.winner ? 'FINISHED' : 'SCHEDULED',
+        winner: autoWinner || null,
+        scoreStr: autoWinner ? buildScoreStr() : null,
+        setsWinner: autoWinner ? setsWinner : null,
+        setsLoser: autoWinner ? setsLoser : null,
+        status: autoWinner ? 'FINISHED' : 'SCHEDULED',
       })
       show('Partido del cuadro actualizado ✓')
       onSaved()
@@ -757,7 +770,7 @@ function BracketEditorModal({ match, onClose, onSaved }) {
     } finally { setSaving(false) }
   }
 
-  const clearWinner = async () => {
+  const clearResult = async () => {
     setSaving(true)
     try {
       await api.put(`/bracket/${match.id}`, { winner: null, scoreStr: null, setsWinner: null, setsLoser: null, status: 'SCHEDULED' })
@@ -772,6 +785,10 @@ function BracketEditorModal({ match, onClose, onSaved }) {
     'QF': 'Cuartos de final', 'SF': 'Semifinal', 'F': 'Final',
   }
 
+  const loserName = form.player1 && form.player2
+    ? (autoWinner === form.player1 ? form.player2 : form.player1)
+    : ''
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-sheet" onClick={e => e.stopPropagation()}>
@@ -781,7 +798,7 @@ function BracketEditorModal({ match, onClose, onSaved }) {
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
         <p className="text-muted mb-12">
-          Cargá los jugadores y el resultado con sets. El ganador se propaga automáticamente a la siguiente ronda.
+          Cargá los jugadores y el resultado por sets. El ganador se determina automáticamente.
         </p>
 
         <div className="form-group">
@@ -797,70 +814,83 @@ function BracketEditorModal({ match, onClose, onSaved }) {
 
         {form.player1 && form.player2 && (
           <>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>Ganador (dejar sin seleccionar si no terminó)</div>
-            <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-              {[form.player1, form.player2].filter(Boolean).map(p => (
-                <button key={p} onClick={() => setForm(f => ({ ...f, winner: f.winner === p ? '' : p }))} style={{
-                  flex: 1, padding: '10px 6px', borderRadius: 8, cursor: 'pointer',
-                  border: `1px solid ${form.winner === p ? G : 'var(--border)'}`,
-                  background: form.winner === p ? G : 'var(--card-bg)',
-                  color: form.winner === p ? 'white' : 'var(--text)',
-                  fontSize: 12, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                  {form.winner === p ? '✓ ' : ''}{p}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {form.winner && (
-          <>
-            <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>Resultado por set</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '56px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Resultado por set</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
               <div />
               {['Set 1','Set 2','Set 3','Set 4','Set 5'].map(s => (
-                <div key={s} style={{ fontSize: 9, color: '#888', textAlign: 'center', fontWeight: 600 }}>{s}</div>
+                <div key={s} style={{ fontSize: 9, color: 'var(--text-muted)', textAlign: 'center', fontWeight: 600 }}>{s}</div>
               ))}
             </div>
-            {['w','l'].map((side) => (
-              <div key={side} style={{ display: 'grid', gridTemplateColumns: '56px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
-                <div style={{
-                  fontSize: 10, fontWeight: 600,
-                  color: side === 'w' ? G : '#888',
-                  display: 'flex', alignItems: 'center', overflow: 'hidden',
-                }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 9 }}>
-                    {side === 'w'
-                      ? form.winner.split(' ').pop()
-                      : (form.winner === form.player1 ? form.player2 : form.player1).split(' ').pop()}
-                  </span>
-                </div>
-                {form.sets.map((s, i) => (
-                  <input key={i} type="number" min="0" max="7" value={s[side]}
-                    onChange={e => setSetScore(i, side, e.target.value)}
-                    style={{
-                      height: 32, borderRadius: 5, textAlign: 'center',
-                      fontSize: 13, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
-                      border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : 'var(--border)'}`,
-                      background: s[side] !== '' && side === 'w' ? 'var(--green-light)' : 'var(--cream)',
-                      color: s[side] !== '' ? (side === 'w' ? G : 'var(--text-mid)') : 'var(--text-muted)',
-                    }}
-                  />
-                ))}
+            <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
+              <div style={{
+                fontSize: 10, fontWeight: 600,
+                color: autoWinner === form.player1 ? G : 'var(--text-mid)',
+                display: 'flex', alignItems: 'center', overflow: 'hidden',
+              }}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 9 }}>
+                  {form.player1.split(' ').pop()}
+                </span>
               </div>
-            ))}
-            <div style={{ fontSize: 11, color: '#888', marginTop: 8, marginBottom: 14 }}>
-              Sets: <strong>{countSets().setsWinner ?? 0}-{countSets().setsLoser ?? 0}</strong>
+              {form.sets.map((s, i) => (
+                <input key={i} type="number" min="0" max="7" value={s.w}
+                  onChange={e => setSetScore(i, 'w', e.target.value)}
+                  style={{
+                    height: 34, borderRadius: 5, textAlign: 'center',
+                    fontSize: 14, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
+                    border: `0.5px solid ${s.w !== '' ? G : 'var(--border)'}`,
+                    background: s.w !== '' ? 'var(--green-light)' : 'var(--cream)',
+                    color: s.w !== '' ? G : 'var(--text-muted)',
+                  }}
+                />
+              ))}
             </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
+              <div style={{
+                fontSize: 10, fontWeight: 600,
+                color: autoWinner === form.player2 ? G : 'var(--text-mid)',
+                display: 'flex', alignItems: 'center', overflow: 'hidden',
+              }}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 9 }}>
+                  {form.player2.split(' ').pop()}
+                </span>
+              </div>
+              {form.sets.map((s, i) => (
+                <input key={i} type="number" min="0" max="7" value={s.l}
+                  onChange={e => setSetScore(i, 'l', e.target.value)}
+                  style={{
+                    height: 34, borderRadius: 5, textAlign: 'center',
+                    fontSize: 14, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
+                    border: `0.5px solid ${s.l !== '' ? 'var(--border)' : 'var(--border)'}`,
+                    background: 'var(--cream)',
+                    color: s.l !== '' ? 'var(--text-mid)' : 'var(--text-muted)',
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Resumen auto */}
+            {filledSets > 0 && (
+              <div style={{
+                marginTop: 10, padding: '8px 12px', borderRadius: 8,
+                background: autoWinner ? 'var(--green-pale)' : 'var(--card-bg)',
+                border: `1px solid ${autoWinner ? 'var(--green-mid)' : 'var(--border)'}`,
+                fontSize: 12, fontWeight: 600,
+                color: autoWinner ? G : 'var(--text-muted)',
+                textAlign: 'center',
+              }}>
+                {autoWinner
+                  ? `${autoWinner.split(' ').pop()} gana ${setsWinner}-${setsLoser}`
+                  : `Sets: ${setsWinner}-${setsLoser} (sin ganador claro aún)`}
+              </div>
+            )}
           </>
         )}
 
-        <button className="btn btn-primary btn-full" onClick={save} disabled={saving} style={{ marginBottom: 8 }}>
+        <button className="btn btn-primary btn-full" onClick={save} disabled={saving} style={{ marginBottom: 8, marginTop: 16 }}>
           {saving ? 'Guardando...' : 'Guardar partido'}
         </button>
         {match.winner && (
-          <button className="btn btn-danger btn-full" onClick={clearWinner} disabled={saving}>
+          <button className="btn btn-danger btn-full" onClick={clearResult} disabled={saving}>
             Limpiar resultado
           </button>
         )}
