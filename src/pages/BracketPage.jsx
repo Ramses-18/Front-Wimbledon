@@ -282,7 +282,7 @@ function DetailModal({ match, onClose }) {
 
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
           <div style={{ padding: '4px 0' }}>
-            <strong>Estado:</strong> {match.status === 'IN_PLAY' ? '🔴 En vivo' : match.winner ? '✓ Finalizado' : '⏳ Por jugar'}
+            <strong>Estado:</strong> {match.status === 'IN_PLAY' ? '🔴 En vivo' : match.status === 'SUSPENDED' ? '⏸️ Suspendido' : match.winner ? '✓ Finalizado' : '⏳ Por jugar'}
           </div>
           {match.setsWinner && (
             <div style={{ padding: '4px 0' }}>

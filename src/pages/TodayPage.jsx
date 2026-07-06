@@ -13,8 +13,9 @@ function getMatchStatus(match) {
   case 'RETIRED':
     return 'terminado'
   case 'IN_PLAY':
-  case 'SUSPENDED':
     return 'jugando'
+  case 'SUSPENDED':
+    return 'suspendido'
   case 'SCHEDULED':
   default:
     return 'por_jugar'
@@ -44,13 +45,15 @@ export default function TodayPage() {
       const { data } = await api.get('/matches/upcoming')
       setMatches(data)
 
-      const jugando    = data.filter(m => getMatchStatus(m) === 'jugando').length
-      const porJugar   = data.filter(m => getMatchStatus(m) === 'por_jugar').length
-      const terminados = data.filter(m => getMatchStatus(m) === 'terminado').length
+      const jugando     = data.filter(m => getMatchStatus(m) === 'jugando').length
+      const suspendidos = data.filter(m => getMatchStatus(m) === 'suspendido').length
+      const porJugar    = data.filter(m => getMatchStatus(m) === 'por_jugar').length
+      const terminados  = data.filter(m => getMatchStatus(m) === 'terminado').length
 
-      if (jugando > 0)         setFilter('jugando')
-      else if (porJugar > 0)   setFilter('por_jugar')
-      else if (terminados > 0) setFilter('terminado')
+      if (jugando > 0)          setFilter('jugando')
+      else if (suspendidos > 0) setFilter('suspendido')
+      else if (porJugar > 0)    setFilter('por_jugar')
+      else if (terminados > 0)  setFilter('terminado')
     } catch (e) {
       console.error(e)
     } finally {
@@ -64,17 +67,20 @@ export default function TodayPage() {
     return () => clearInterval(interval)
   }, [load])
 
-  const jugando    = matches.filter(m => getMatchStatus(m) === 'jugando')
-  const porJugar   = matches.filter(m => getMatchStatus(m) === 'por_jugar')
-  const terminados = matches.filter(m => getMatchStatus(m) === 'terminado')
+  const jugando     = matches.filter(m => getMatchStatus(m) === 'jugando')
+  const suspendidos = matches.filter(m => getMatchStatus(m) === 'suspendido')
+  const porJugar    = matches.filter(m => getMatchStatus(m) === 'por_jugar')
+  const terminados  = matches.filter(m => getMatchStatus(m) === 'terminado')
 
   const FILTERS = [
-    { key: 'jugando',   label: 'En juego',   count: jugando.length,    color: 'var(--danger)' },
-    { key: 'por_jugar', label: 'Por jugar',   count: porJugar.length,   color: G },
-    { key: 'terminado', label: 'Terminados',   count: terminados.length, color: 'var(--text-muted)' },
+    { key: 'jugando',    label: 'En juego',    count: jugando.length,     color: 'var(--danger)' },
+    { key: 'suspendido', label: 'Suspendido',  count: suspendidos.length, color: '#E65100' },
+    { key: 'por_jugar',  label: 'Por jugar',   count: porJugar.length,    color: G },
+    { key: 'terminado',  label: 'Terminados',  count: terminados.length,  color: 'var(--text-muted)' },
   ]
 
   const visible = filter === 'jugando' ? jugando
+    : filter === 'suspendido' ? suspendidos
     : filter === 'por_jugar' ? porJugar
     : terminados
 
@@ -176,11 +182,12 @@ export default function TodayPage() {
           {visible.length === 0 ? (
             <div className="empty-state" style={{ padding: '32px 16px' }}>
               <div className="icon" style={{ fontSize: 32 }}>
-                {filter === 'jugando' ? '⏳' : filter === 'por_jugar' ? '🎾' : '✓'}
+                {filter === 'jugando' ? '⏳' : filter === 'suspendido' ? '⏸️' : filter === 'por_jugar' ? '🎾' : '✓'}
               </div>
               <p>
-                {filter === 'jugando'   ? 'No hay partidos en curso ahora.' :
-                 filter === 'por_jugar' ? 'No hay partidos pendientes.' :
+                {filter === 'jugando'    ? 'No hay partidos en curso ahora.' :
+                 filter === 'suspendido' ? 'No hay partidos suspendidos.' :
+                 filter === 'por_jugar'  ? 'No hay partidos pendientes.' :
                  'No hay partidos terminados aún.'}
               </p>
             </div>

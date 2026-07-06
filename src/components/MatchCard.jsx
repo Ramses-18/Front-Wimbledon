@@ -230,10 +230,10 @@ export default function MatchCard({ match, status, onRefresh }) {
   }
 
   // FIX Req 1: Mostrar formulario si no hay pick y no cerró, o si está editando. Nunca durante IN_PLAY.
-  const showForm = status !== 'jugando' && ((!pick && !closed) || editing)
+  const showForm = status !== 'jugando' && status !== 'suspendido' && ((!pick && !closed) || editing)
 
   // FIX Req 1: Permitir corrección solo si no está en juego, cerró, tiene pick sin corregir, y no terminó
-  const canCorrect = status !== 'jugando' && closed && pick && !pick.isCorrection && status !== 'terminado'
+  const canCorrect = status !== 'jugando' && status !== 'suspendido' && closed && pick && !pick.isCorrection && status !== 'terminado'
 
   // Cuadraditos de score
   const resultSets = (() => {
@@ -326,6 +326,26 @@ export default function MatchCard({ match, status, onRefresh }) {
                 animation: 'pulse .8s infinite',
               }} />
               LIVE
+            </span>
+          </div>
+        )}
+
+        {/* Badge SUSPENDIDO */}
+        {status === 'suspendido' && (
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '5px 12px', background: '#FFF3E0', borderBottom: '0.5px solid #E65100',
+          }}>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Suspendido</span>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              color: '#E65100', fontSize: 9, fontWeight: 700,
+              padding: '2px 7px', borderRadius: 20, background: '#FFF3E0',
+            }}>
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="2" width="12" height="20" rx="2" />
+              </svg>
+              SUSPENDIDO
             </span>
           </div>
         )}
