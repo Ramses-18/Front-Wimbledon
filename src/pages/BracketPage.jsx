@@ -105,7 +105,7 @@ export default function BracketPage() {
               display: 'inline-block', marginLeft: 4,
               background: selectedRound === r.key ? 'rgba(255,255,255,.2)' : 'var(--green-pale)',
               padding: '1px 5px', borderRadius: 8, fontSize: 9,
-            }}>{byRound[r.key]?.filter(m => m.player1 || m.player2).length || 0}/{r.count}</span>
+            }}>{matches.filter(m => m.player1 || m.player2).length}{r.count > 0 ? `/${r.count}` : ''}</span>
           </button>
         ))}
       </div>
@@ -119,15 +119,15 @@ export default function BracketPage() {
               fontSize: 13, fontWeight: 700, color: G, marginBottom: 8,
               textTransform: 'uppercase', letterSpacing: '.05em',
             }}>
-              {ROUND_LABELS[round] || round} · {matches.filter(m => m.player1 || m.player2).length}/{matches.length}
+              {ROUND_LABELS[round] || round} · {matches.filter(m => m.player1 || m.player2).length} partido{matches.filter(m => m.player1 || m.player2).length !== 1 ? 's' : ''}
             </h3>
 
-            {matches.length === 0 ? (
+            {matches.filter(m => m.player1 || m.player2).length === 0 ? (
               <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: '12px 0' }}>
                 No hay partidos en esta ronda todavía.
               </p>
             ) : (
-              matches.map(m => (
+              matches.filter(m => m.player1 || m.player2).map(m => (
                 <BracketMatchCard key={m.id} match={m} onClick={() => setDetail(m)} />
               ))
             )}

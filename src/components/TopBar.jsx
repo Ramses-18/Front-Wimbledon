@@ -69,7 +69,7 @@ export default function TopBar() {
     }}>
       <div>
         <div style={{ fontFamily: 'Georgia,serif', fontSize: 17, fontWeight: 700 }}>
-          Wimbledon 2026
+          SW 19
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,.65)', marginTop: 1 }}>
           {user?.name}

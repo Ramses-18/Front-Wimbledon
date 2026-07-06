@@ -65,10 +65,15 @@ export default function TablaPage() {
         marginBottom: 2, color: 'var(--text)',
       }}>Tabla de Posiciones</h1>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
-        Puntos acumulados Wimbledon 2026
+        Puntos acumulados SW 19
       </p>
 
-      {loading && <div className="spinner" />}
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <div className="spinner" />
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 10 }}>Cargando la tabla...</p>
+        </div>
+      )}
 
       {!loading && lb.length === 0 && (
         <div className="empty-state">
