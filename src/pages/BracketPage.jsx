@@ -105,7 +105,7 @@ export default function BracketPage() {
               display: 'inline-block', marginLeft: 4,
               background: selectedRound === r.key ? 'rgba(255,255,255,.2)' : 'var(--green-pale)',
               padding: '1px 5px', borderRadius: 8, fontSize: 9,
-            }}>{matches.filter(m => m.player1 || m.player2).length}{r.count > 0 ? `/${r.count}` : ''}</span>
+            }}>{(byRound[r.key] || []).filter(m => m.player1 || m.player2).length}{r.count > 0 ? `/${r.count}` : ''}</span>
           </button>
         ))}
       </div>
