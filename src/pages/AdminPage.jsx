@@ -319,7 +319,7 @@ export default function AdminPage() {
   }
 
   const initBracket = async () => {
-    if (!confirm('¿Inicializar el cuadro? Esto crea 255 partidos vacíos (R128 → F). Solo se hace una vez.')) return
+    if (!confirm('¿Inicializar el cuadro? Esto crea 127 partidos vacíos (R128 → F). Solo se hace una vez.')) return
     try {
       await api.post('/bracket/init')
       show('Cuadro inicializado ✓')
@@ -633,7 +633,7 @@ export default function AdminPage() {
               El cuadro aún no tiene partidos. Inicializalo para crear la estructura completa (R128 → Final).
             </p>
             <button className="btn btn-primary btn-full" onClick={initBracket}>
-              🔧 Inicializar cuadro (255 partidos)
+              🔧 Inicializar cuadro (127 partidos)
             </button>
           </>
         ) : (
