@@ -292,3 +292,15 @@ label {
   transition: background .15s;
 }
 .theme-toggle:hover { background: rgba(255,255,255,.25); }
+
+/* Chat typing dots */
+.dot-pulse {
+  display: inline-block;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-muted);
+  animation: dotBounce .6s ease-in-out infinite alternate;
+}
+@keyframes dotBounce {
+  0%   { opacity: .3; transform: translateY(0); }
+  100% { opacity: 1;  transform: translateY(-3px); }
+}
