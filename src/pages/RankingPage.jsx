@@ -7,7 +7,6 @@ const C = {
   bg:         '#0a1a0f',
   green:      '#4CAF50',
   greenDeep:  '#1B5E20',
-  greenPale:  'rgba(76,175,80,.08)',
   white:      '#fff',
   white50:    'rgba(255,255,255,.50)',
   white35:    'rgba(255,255,255,.35)',
@@ -26,6 +25,106 @@ const inputStyle = {
   background: C.white04, border: '1px solid ' + C.white08,
   borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px',
   outline: 'none',
+}
+
+/* ── Podium block for top 3 ── */
+function Podium({ ranking, isAdmin, onEdit, onDelete }) {
+  const top = ranking.slice(0, 3)
+  if (top.length === 0) return null
+
+  // Order: [2nd, 1st, 3rd] for visual podium layout
+  const order = []
+  if (top[1]) order.push({ ...top[1], pos: 2 })
+  if (top[0]) order.push({ ...top[0], pos: 1 })
+  if (top[2]) order.push({ ...top[2], pos: 3 })
+
+  const podium = {
+    1: { height: 110, accent: C.gold, accentBg: 'rgba(200,169,81,.08)', border: 'rgba(200,169,81,.15)', label: '1', labelColor: C.gold },
+    2: { height: 78,  accent: 'rgba(255,255,255,.5)', accentBg: 'rgba(255,255,255,.03)', border: 'rgba(255,255,255,.1)', label: '2', labelColor: 'rgba(255,255,255,.5)' },
+    3: { height: 56,  accent: 'rgba(193,154,107,.7)', accentBg: 'rgba(193,154,107,.04)', border: 'rgba(193,154,107,.12)', label: '3', labelColor: 'rgba(193,154,107,.7)' },
+  }
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+      gap: 8, marginBottom: 24, padding: '0 4px',
+    }}>
+      {order.map(p => {
+        const cfg = podium[p.pos]
+        return (
+          <div key={p.id} style={{
+            flex: 1, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'flex-end',
+          }}>
+            {/* Player info above podium */}
+            <div style={{
+              textAlign: 'center', marginBottom: 10, width: '100%',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                fontSize: p.pos === 1 ? 14 : 12, fontWeight: 600,
+                color: p.pos === 1 ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.6)',
+                letterSpacing: '-.01em',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                padding: '0 4px',
+              }}>
+                {p.playerName}
+              </div>
+              <div style={{
+                fontSize: p.pos === 1 ? 18 : 14, fontWeight: 700,
+                color: cfg.accent, fontFeatureSettings: '"tnum"',
+                letterSpacing: '-.02em', marginTop: 2,
+              }}>
+                {p.points.toLocaleString()}
+                <span style={{ fontSize: 9, fontWeight: 500, color: C.white18, marginLeft: 2 }}>pts</span>
+              </div>
+            </div>
+
+            {/* Podium column */}
+            <div style={{
+              width: '100%',
+              height: cfg.height,
+              borderRadius: '12px 12px 0 0',
+              background: `linear-gradient(180deg, ${cfg.accentBg} 0%, rgba(255,255,255,.015) 100%)`,
+              border: `1px solid ${cfg.border}`,
+              borderBottom: 'none',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'space-between',
+              paddingTop: 14, paddingBottom: 12,
+              position: 'relative', overflow: 'hidden',
+            }}>
+              {/* Position number */}
+              <div style={{
+                fontSize: p.pos === 1 ? 28 : 20, fontWeight: 300,
+                fontFamily: 'Georgia, serif',
+                color: cfg.labelColor, lineHeight: 1, opacity: .6,
+              }}>
+                {cfg.label}
+              </div>
+
+              {/* Admin actions on podium */}
+              {isAdmin && (
+                <div style={{ display: 'flex', gap: 2 }}>
+                  <button onClick={() => onEdit(p)} style={{
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    fontSize: 11, color: C.white18, padding: '2px 4px',
+                  }}>
+                    ✏️
+                  </button>
+                  <button onClick={() => onDelete(p.id)} style={{
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    fontSize: 11, color: 'rgba(244,67,54,.3)', padding: '2px 4px',
+                  }}>
+                    🗑️
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function RankingPage() {
@@ -55,23 +154,14 @@ export default function RankingPage() {
   const handleAdd = () => {
     if (!newName.trim() || !newPoints) return
     api.post('/atp-ranking', { playerName: newName.trim(), points: parseInt(newPoints) })
-      .then(() => {
-        setNewName('')
-        setNewPoints('')
-        show('Jugador agregado')
-        fetchRanking()
-      })
+      .then(() => { setNewName(''); setNewPoints(''); show('Jugador agregado'); fetchRanking() })
       .catch(e => show(e.response?.data?.message || 'Error al agregar', 'error'))
   }
 
   const handleUpdate = (id) => {
     if (!editPoints) return
     api.put(`/atp-ranking/${id}`, { playerName: editName.trim(), points: parseInt(editPoints) })
-      .then(() => {
-        setEditingId(null)
-        show('Jugador actualizado')
-        fetchRanking()
-      })
+      .then(() => { setEditingId(null); show('Jugador actualizado'); fetchRanking() })
       .catch(e => show(e.response?.data?.message || 'Error al actualizar', 'error'))
   }
 
@@ -82,18 +172,9 @@ export default function RankingPage() {
       .catch(() => show('Error al eliminar', 'error'))
   }
 
-  const startEdit = (r) => {
-    setEditingId(r.id)
-    setEditName(r.playerName)
-    setEditPoints(String(r.points))
-  }
+  const startEdit = (r) => { setEditingId(r.id); setEditName(r.playerName); setEditPoints(String(r.points)) }
 
-  const posColor = (i) => {
-    if (i === 0) return { bg: C.gold, color: '#fff' }
-    if (i === 1) return { bg: 'rgba(255,255,255,.2)', color: C.white50 }
-    if (i === 2) return { bg: 'rgba(193,154,107,.3)', color: 'rgba(255,255,255,.7)' }
-    return { bg: C.white06, color: C.white25 }
-  }
+  const rest = ranking.slice(3)
 
   return (
     <div style={{ background: C.bg, minHeight: '100vh', position: 'relative' }}>
@@ -125,24 +206,21 @@ export default function RankingPage() {
           </div>
         )}
 
-        {/* Admin: Add button */}
+        {/* Admin: Add button + form */}
         {isAdmin && !loading && (
           <div style={{ marginBottom: 20 }}>
-            <button
-              onClick={() => setShowAdd(f => !f)}
-              style={{
-                width: '100%', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600,
-                background: showAdd ? 'transparent' : C.white04,
-                border: showAdd ? '1px solid rgba(244,67,54,.2)' : '1px solid ' + C.white08,
-                color: showAdd ? 'rgba(244,67,54,.7)' : 'rgba(255,255,255,.5)',
-                cursor: 'pointer', letterSpacing: '.02em',
-              }}>
+            <button onClick={() => setShowAdd(f => !f)} style={{
+              width: '100%', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600,
+              background: showAdd ? 'transparent' : C.white04,
+              border: showAdd ? '1px solid rgba(244,67,54,.2)' : '1px solid ' + C.white08,
+              color: showAdd ? 'rgba(244,67,54,.7)' : 'rgba(255,255,255,.5)',
+              cursor: 'pointer', letterSpacing: '.02em',
+            }}>
               {showAdd ? '✕ Cerrar' : '+ Agregar jugador'}
             </button>
           </div>
         )}
 
-        {/* Admin: Add form */}
         {isAdmin && showAdd && (
           <div style={{
             marginBottom: 20, background: C.white04,
@@ -150,40 +228,19 @@ export default function RankingPage() {
           }}>
             <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>
-                  Nombre
-                </label>
-                <input
-                  value={newName}
-                  onChange={e => setNewName(e.target.value)}
-                  placeholder="Nombre del jugador"
-                  style={inputStyle}
-                />
+                <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Nombre</label>
+                <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Nombre del jugador" style={inputStyle} />
               </div>
               <div style={{ width: 100 }}>
-                <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>
-                  Puntos
-                </label>
-                <input
-                  type="number"
-                  value={newPoints}
-                  onChange={e => setNewPoints(e.target.value)}
-                  placeholder="0"
-                  style={inputStyle}
-                />
+                <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Puntos</label>
+                <input type="number" value={newPoints} onChange={e => setNewPoints(e.target.value)} placeholder="0" style={inputStyle} />
               </div>
             </div>
-            <button
-              onClick={handleAdd}
-              disabled={!newName.trim() || !newPoints}
-              style={{
-                width: '100%', background: C.green, color: '#fff',
-                borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600,
-                border: 'none', cursor: 'pointer',
-                opacity: (!newName.trim() || !newPoints) ? .4 : 1,
-              }}>
-              Agregar
-            </button>
+            <button onClick={handleAdd} disabled={!newName.trim() || !newPoints} style={{
+              width: '100%', background: C.green, color: '#fff',
+              borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600,
+              border: 'none', cursor: 'pointer', opacity: (!newName.trim() || !newPoints) ? .4 : 1,
+            }}>Agregar</button>
           </div>
         )}
 
@@ -194,122 +251,108 @@ export default function RankingPage() {
           </p>
         )}
 
-        {/* Ranking list */}
+        {/* Podium: top 3 */}
         {!loading && ranking.length > 0 && (
-          <div style={{
-            background: C.white04, border: '1px solid ' + C.white06,
-            borderRadius: 14, overflow: 'hidden',
-          }}>
-            {ranking.map((r, i) => {
-              const isEditing = editingId === r.id
-              const pc = posColor(i)
-              const isLast = i === ranking.length - 1
-              return (
-                <div key={r.id} style={{
-                  display: 'flex', alignItems: 'center',
-                  padding: '14px 16px', gap: 12,
-                  borderBottom: isLast ? 'none' : '1px solid ' + C.white06,
-                  transition: 'background .15s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = C.white06}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                >
-                  {/* Position badge */}
-                  <div style={{
-                    width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 700, fontFeatureSettings: '"tnum"',
-                    background: pc.bg, color: pc.color,
-                  }}>
-                    {i + 1}
-                  </div>
+          <Podium ranking={ranking} isAdmin={isAdmin} onEdit={startEdit} onDelete={handleDelete} />
+        )}
 
-                  {isEditing && isAdmin ? (
-                    <>
-                      <input
-                        value={editName}
-                        onChange={e => setEditName(e.target.value)}
-                        style={{
+        {/* Rest of ranking: position 4+ */}
+        {!loading && rest.length > 0 && (
+          <>
+            <div style={{
+              fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,.2)',
+              letterSpacing: '.1em', textTransform: 'uppercase',
+              margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              <span style={{ width: 2, height: 10, borderRadius: 1, background: 'rgba(255,255,255,.3)', display: 'inline-block' }} />
+              Resto del ranking <span style={{ fontWeight: 400, color: 'rgba(255,255,255,.12)', letterSpacing: '.05em' }}>{rest.length}</span>
+            </div>
+            <div style={{
+              background: C.white04, border: '1px solid ' + C.white06,
+              borderRadius: 14, overflow: 'hidden',
+            }}>
+              {rest.map((r, i) => {
+                const idx = i + 3
+                const isEditing = editingId === r.id
+                const isLast = i === rest.length - 1
+                return (
+                  <div key={r.id} style={{
+                    display: 'flex', alignItems: 'center',
+                    padding: '12px 16px', gap: 12,
+                    borderBottom: isLast ? 'none' : '1px solid ' + C.white06,
+                    transition: 'background .15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = C.white06}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <div style={{
+                      width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 10, fontWeight: 700, fontFeatureSettings: '"tnum"',
+                      background: C.white06, color: C.white25,
+                    }}>
+                      {idx + 1}
+                    </div>
+
+                    {isEditing && isAdmin ? (
+                      <>
+                        <input value={editName} onChange={e => setEditName(e.target.value)} style={{
                           flex: 1, padding: '6px 8px', borderRadius: 6,
                           border: '1px solid ' + C.white08, background: C.white04,
                           color: C.white50, fontSize: 13, outline: 'none',
-                        }}
-                      />
-                      <input
-                        type="number"
-                        value={editPoints}
-                        onChange={e => setEditPoints(e.target.value)}
-                        style={{
+                        }} />
+                        <input type="number" value={editPoints} onChange={e => setEditPoints(e.target.value)} style={{
                           width: 80, padding: '6px 8px', borderRadius: 6,
                           border: '1px solid ' + C.white08, background: C.white04,
                           color: C.white50, fontSize: 13, outline: 'none',
-                        }}
-                      />
-                      <button onClick={() => handleUpdate(r.id)} style={{
-                        background: 'rgba(76,175,80,.15)', border: '1px solid rgba(76,175,80,.2)',
-                        color: C.green, padding: '6px 10px', borderRadius: 6,
-                        cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                      }}>
-                        OK
-                      </button>
-                      <button onClick={() => setEditingId(null)} style={{
-                        background: C.white06, border: '1px solid ' + C.white08,
-                        color: C.white35, padding: '6px 10px', borderRadius: 6,
-                        cursor: 'pointer', fontSize: 11, fontWeight: 600,
-                      }}>
-                        ✕
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {/* Name */}
-                      <div style={{
-                        flex: 1, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,.7)',
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        letterSpacing: '-.01em',
-                      }}>
-                        {r.playerName}
-                      </div>
-                      {/* Points */}
-                      <div style={{
-                        fontSize: 15, fontWeight: 700, color: C.green,
-                        fontFeatureSettings: '"tnum"', minWidth: 55, textAlign: 'right',
-                        letterSpacing: '-.02em',
-                      }}>
-                        {r.points.toLocaleString()}
-                        <span style={{ fontSize: 9, fontWeight: 500, color: C.white18, marginLeft: 3, letterSpacing: '.02em' }}>pts</span>
-                      </div>
-                      {/* Admin actions */}
-                      {isAdmin && (
-                        <div style={{ display: 'flex', gap: 2, marginLeft: 2 }}>
-                          <button onClick={() => startEdit(r)} style={{
-                            background: 'transparent', border: 'none', cursor: 'pointer',
-                            fontSize: 13, color: C.white25, padding: '4px 6px', borderRadius: 6,
-                            transition: 'color .15s',
-                          }}
-                          onMouseEnter={e => e.currentTarget.style.color = C.white50}
-                          onMouseLeave={e => e.currentTarget.style.color = C.white25}
-                          >
-                            ✏️
-                          </button>
-                          <button onClick={() => handleDelete(r.id)} style={{
-                            background: 'transparent', border: 'none', cursor: 'pointer',
-                            fontSize: 13, color: 'rgba(244,67,54,.4)', padding: '4px 6px', borderRadius: 6,
-                            transition: 'color .15s',
-                          }}
-                          onMouseEnter={e => e.currentTarget.style.color = 'rgba(244,67,54,.7)'}
-                          onMouseLeave={e => e.currentTarget.style.color = 'rgba(244,67,54,.4)'}
-                          >
-                            🗑️
-                          </button>
+                        }} />
+                        <button onClick={() => handleUpdate(r.id)} style={{
+                          background: 'rgba(76,175,80,.15)', border: '1px solid rgba(76,175,80,.2)',
+                          color: C.green, padding: '6px 10px', borderRadius: 6,
+                          cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                        }}>OK</button>
+                        <button onClick={() => setEditingId(null)} style={{
+                          background: C.white06, border: '1px solid ' + C.white08,
+                          color: C.white35, padding: '6px 10px', borderRadius: 6,
+                          cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                        }}>✕</button>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{
+                          flex: 1, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.6)',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          letterSpacing: '-.01em',
+                        }}>
+                          {r.playerName}
                         </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+                        <div style={{
+                          fontSize: 14, fontWeight: 700, color: C.green,
+                          fontFeatureSettings: '"tnum"', minWidth: 55, textAlign: 'right',
+                          letterSpacing: '-.02em',
+                        }}>
+                          {r.points.toLocaleString()}
+                          <span style={{ fontSize: 9, fontWeight: 500, color: C.white18, marginLeft: 3 }}>pts</span>
+                        </div>
+                        {isAdmin && (
+                          <div style={{ display: 'flex', gap: 2, marginLeft: 2 }}>
+                            <button onClick={() => startEdit(r)} style={{
+                              background: 'transparent', border: 'none', cursor: 'pointer',
+                              fontSize: 13, color: C.white25, padding: '4px 6px', borderRadius: 6,
+                            }}>✏️</button>
+                            <button onClick={() => handleDelete(r.id)} style={{
+                              background: 'transparent', border: 'none', cursor: 'pointer',
+                              fontSize: 13, color: 'rgba(244,67,54,.4)', padding: '4px 6px', borderRadius: 6,
+                            }}>🗑️</button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </>
         )}
 
         {isAdmin && !loading && ranking.length > 0 && (
