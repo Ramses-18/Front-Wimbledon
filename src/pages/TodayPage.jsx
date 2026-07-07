@@ -77,14 +77,20 @@ export default function TodayPage() {
     { key: 'suspendido', label: 'Suspendido',  count: suspendidos.length, color: '#E65100' },
     { key: 'por_jugar',  label: 'Por jugar',   count: porJugar.length,    color: G },
     { key: 'terminado',  label: 'Terminados',  count: terminados.length,  color: 'var(--text-muted)' },
-  ]
+  ].filter(f => f.count > 0)
+
+  // Auto-select first available filter if current is empty
+  if (FILTERS.length > 0 && !FILTERS.find(f => f.key === filter)) {
+    setFilter(FILTERS[0].key)
+  }
 
   const visible = filter === 'jugando' ? jugando
     : filter === 'suspendido' ? suspendidos
     : filter === 'por_jugar' ? porJugar
     : terminados
 
-  // Separar en hoy y mañana
+  // Separar en reanudados, hoy y mañana
+  const otherMatches = visible.filter(m => getMatchDateLabel(m) === 'otro')
   const todayMatches = visible.filter(m => getMatchDateLabel(m) === 'hoy')
   const tomorrowMatches = visible.filter(m => getMatchDateLabel(m) === 'manana')
 
@@ -193,10 +199,20 @@ export default function TodayPage() {
             </div>
           ) : (
             <>
+              {/* Reanudados (partidos de días anteriores) */}
+              {otherMatches.length > 0 && (
+                <>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#E65100', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                    Reanudados ({otherMatches.length})
+                  </div>
+                  {renderGroup(otherMatches)}
+                </>
+              )}
+
               {/* Hoy */}
               {todayMatches.length > 0 && (
                 <>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em', marginTop: otherMatches.length > 0 ? 16 : 0 }}>
                     Hoy ({todayMatches.length})
                   </div>
                   {renderGroup(todayMatches)}
@@ -206,7 +222,7 @@ export default function TodayPage() {
               {/* Mañana */}
               {tomorrowMatches.length > 0 && (
                 <>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em', marginTop: tomorrowMatches.length > 0 && todayMatches.length > 0 ? 8 : 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em', marginTop: (otherMatches.length > 0 || todayMatches.length > 0) ? 8 : 0 }}>
                     Mañana ({tomorrowMatches.length})
                   </div>
                   {renderGroup(tomorrowMatches)}

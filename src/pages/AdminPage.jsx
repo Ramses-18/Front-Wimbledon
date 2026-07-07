@@ -483,6 +483,7 @@ export default function AdminPage() {
         const todayM = matches.filter(m => m.matchDate === todayStr)
         const tomorrowM = matches.filter(m => m.matchDate === tomorrowStr)
         const upcomingM = matches.filter(m => m.matchDate > tomorrowStr)
+        const activePastM = matches.filter(m => m.matchDate < todayStr && (m.status === 'IN_PLAY' || m.status === 'SUSPENDED'))
 
         const renderMatchList = (list) => list.length === 0
           ? <p style={{ padding: 16, fontSize: 13, color: 'var(--text-muted)' }}>No hay partidos.</p>
@@ -566,6 +567,17 @@ export default function AdminPage() {
 
         return (
           <>
+            {activePastM.length > 0 && (
+              <>
+                <h3 style={{ marginBottom: 12, fontSize: 14, color: '#E65100', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+                  Reanudados ({activePastM.length})
+                </h3>
+                <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden', borderColor: '#E65100' }}>
+                  {renderMatchList(activePastM)}
+                </div>
+              </>
+            )}
+
             <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
               Hoy ({todayM.length})
             </h3>
