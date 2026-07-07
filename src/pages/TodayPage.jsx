@@ -2,8 +2,23 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { api } from '../context/AuthContext.jsx'
 import MatchCard from '../components/MatchCard.jsx'
 
-const G = 'var(--green)'
-const BORDER = 'var(--border)'
+// ── Colour tokens (dark Centre Court) ──
+const C = {
+  bg:         '#0a1a0f',
+  green:      '#1B5E20',
+  greenLight: 'rgba(76,175,80,.35)',
+  greenPale:  'rgba(76,175,80,.08)',
+  white:      '#fff',
+  white12:    'rgba(255,255,255,.12)',
+  white06:    'rgba(255,255,255,.06)',
+  white45:    'rgba(255,255,255,.45)',
+  white35:    'rgba(255,255,255,.35)',
+  white25:    'rgba(255,255,255,.25)',
+  white18:    'rgba(255,255,255,.18)',
+  gold:       '#C8A951',
+  orange:     '#E65100',
+  red:        '#f44336',
+}
 
 function getMatchStatus(match) {
   switch (match.status) {
@@ -32,6 +47,35 @@ function getMatchDateLabel(match) {
   if (matchDate === todayStr) return 'hoy'
   if (matchDate === tomorrowStr) return 'manana'
   return 'otro'
+}
+
+// ── Tiny animated dot ──
+function LiveDot({ color = C.red }) {
+  return (
+    <span style={{
+      display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
+      background: color, marginRight: 5, flexShrink: 0,
+      animation: 'pulse 1.4s infinite',
+    }} />
+  )
+}
+
+// ── Section heading (Reanudados / Hoy / Mañana) ──
+function SectionLabel({ text, color, count }) {
+  return (
+    <div style={{
+      fontSize: 10, fontWeight: 700, color, letterSpacing: '.08em',
+      textTransform: 'uppercase', marginBottom: 10, paddingLeft: 2,
+      display: 'flex', alignItems: 'center', gap: 8,
+    }}>
+      <span style={{ width: 4, height: 14, borderRadius: 2, background: color }} />
+      {text}
+      <span style={{
+        fontSize: 9, fontWeight: 600, color: C.white25,
+        background: C.white06, padding: '1px 7px', borderRadius: 8,
+      }}>{count}</span>
+    </div>
+  )
 }
 
 export default function TodayPage() {
@@ -73,10 +117,10 @@ export default function TodayPage() {
   const terminados  = matches.filter(m => getMatchStatus(m) === 'terminado')
 
   const FILTERS = [
-    { key: 'jugando',    label: 'En juego',    count: jugando.length,     color: 'var(--danger)' },
-    { key: 'suspendido', label: 'Suspendido',  count: suspendidos.length, color: '#E65100' },
-    { key: 'por_jugar',  label: 'Por jugar',   count: porJugar.length,    color: G },
-    { key: 'terminado',  label: 'Terminados',  count: terminados.length,  color: 'var(--text-muted)' },
+    { key: 'jugando',    label: 'En juego',    count: jugando.length,     dot: C.red,    activeDot: false },
+    { key: 'suspendido', label: 'Suspendido',  count: suspendidos.length, dot: C.orange,  activeDot: false },
+    { key: 'por_jugar',  label: 'Por jugar',   count: porJugar.length,    dot: null,      activeDot: false },
+    { key: 'terminado',  label: 'Terminados',  count: terminados.length,  dot: null,      activeDot: false },
   ].filter(f => f.count > 0)
 
   // Auto-select first available filter if current is empty
@@ -90,8 +134,8 @@ export default function TodayPage() {
     : terminados
 
   // Separar en reanudados, hoy y mañana
-  const otherMatches = visible.filter(m => getMatchDateLabel(m) === 'otro')
-  const todayMatches = visible.filter(m => getMatchDateLabel(m) === 'hoy')
+  const otherMatches    = visible.filter(m => getMatchDateLabel(m) === 'otro')
+  const todayMatches    = visible.filter(m => getMatchDateLabel(m) === 'hoy')
   const tomorrowMatches = visible.filter(m => getMatchDateLabel(m) === 'manana')
 
   const renderGroup = (courtMatches) => {
@@ -103,17 +147,13 @@ export default function TodayPage() {
 
     if (groupByCourt) {
       return Object.entries(byCourt).map(([court, cMatches]) => (
-        <div key={court} style={{ marginBottom: 20 }}>
+        <div key={court} style={{ marginBottom: 16 }}>
           <div style={{
-            fontSize: 12, fontWeight: 700, color: G,
+            fontSize: 9, fontWeight: 700, color: C.greenLight,
+            letterSpacing: '.1em', textTransform: 'uppercase',
             marginBottom: 8, paddingLeft: 4,
-            display: 'flex', alignItems: 'center', gap: 6,
           }}>
-            {court}
-            <span style={{
-              fontSize: 10, color: 'var(--text-muted)', fontWeight: 500,
-              background: 'var(--green-pale)', padding: '2px 8px', borderRadius: 10,
-            }}>{cMatches.length} {cMatches.length === 1 ? 'partido' : 'partidos'}</span>
+            {court} <span style={{ color: C.white25, marginLeft: 4 }}>{cMatches.length}</span>
           </div>
           {cMatches.map(m => (
             <MatchCard key={m.id} match={m} status={getMatchStatus(m)} onRefresh={load} />
@@ -128,69 +168,111 @@ export default function TodayPage() {
   }
 
   const todayStr = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })
-  const tomorrowDate = new Date()
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1)
-  const tomorrowStr = tomorrowDate.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2 style={{ marginBottom: 2 }}>Partidos</h2>
-      <p className="text-muted" style={{ marginBottom: 16 }}>{todayStr}</p>
+    <div style={{
+      minHeight: '100vh', background: C.bg, paddingBottom: 80,
+    }}>
+      {/* Grass gradient overlay */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, height: 300, pointerEvents: 'none', zIndex: 0,
+        background: 'linear-gradient(180deg, rgba(27,94,32,.12) 0%, transparent 100%)',
+      }} />
 
-      {loading && <div className="spinner" />}
+      {/* Green left stripe */}
+      <div style={{
+        position: 'fixed', left: 0, top: 0, bottom: 0, width: 4,
+        background: C.green, zIndex: 10,
+      }} />
+
+      {/* Header */}
+      <div style={{
+        position: 'relative', zIndex: 1,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
+        padding: '8px 20px 0',
+      }}>
+        <div>
+          <p style={{
+            fontSize: 10, letterSpacing: '.2em', color: 'rgba(255,255,255,.25)',
+            textTransform: 'uppercase', margin: 0,
+          }}>Partidos</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,.4)', margin: '4px 0 0', fontWeight: 500 }}>
+            {todayStr}
+          </p>
+        </div>
+      </div>
+
+      {loading && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
+          <div style={{
+            width: 24, height: 24, border: `2px solid ${C.white18}`,
+            borderTopColor: C.green, borderRadius: '50%',
+            animation: 'spin .7s linear infinite',
+          }} />
+        </div>
+      )}
 
       {!loading && matches.length === 0 && (
-        <div className="empty-state">
-          <div className="icon">🎾</div>
-          <p>No hay partidos cargados para hoy ni mañana.</p>
+        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+          <div style={{ fontSize: 36, marginBottom: 12, opacity: .3 }}>🎾</div>
+          <p style={{ color: C.white25, fontSize: 13 }}>
+            No hay partidos cargados para hoy ni mañana.
+          </p>
         </div>
       )}
 
       {!loading && matches.length > 0 && (
-        <>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-            {FILTERS.map(f => (
-              <button key={f.key} onClick={() => setFilter(f.key)} style={{
-                flex: 1, padding: '8px 4px',
-                borderRadius: 8,
-                border: `1px solid ${filter === f.key ? G : BORDER}`,
-                background: filter === f.key ? G : 'var(--card-bg)',
-                color: filter === f.key ? 'var(--card-bg)' : 'var(--text-muted)',
-                fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                position: 'relative',
-              }}>
-                {f.label}
-                {f.count > 0 && (
-                  <span style={{
-                    position: 'absolute', top: -6, right: -4,
-                    background: filter === f.key ? 'var(--gold)' : f.color,
-                    color: 'var(--card-bg)', fontSize: 9, fontWeight: 700,
-                    width: 16, height: 16, borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>{f.count}</span>
-                )}
-              </button>
-            ))}
+        <div style={{ position: 'relative', zIndex: 1, padding: '16px 16px 0' }}>
+          {/* Filter pills */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+            {FILTERS.map(f => {
+              const isActive = filter === f.key
+              return (
+                <button key={f.key} onClick={() => setFilter(f.key)} style={{
+                  flex: 1, padding: '9px 6px',
+                  borderRadius: 20,
+                  border: `1px solid ${isActive ? 'transparent' : C.white12}`,
+                  background: isActive ? C.green : 'transparent',
+                  color: isActive ? C.white : C.white45,
+                  fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                  transition: 'all .15s',
+                }}>
+                  {f.dot && <LiveDot color={isActive ? C.white : f.dot} />}
+                  {f.label}
+                  {f.count > 0 && (
+                    <span style={{
+                      fontSize: 9, fontWeight: 700,
+                      padding: '1px 5px', borderRadius: 8,
+                      background: isActive ? C.gold : C.white06,
+                      color: isActive ? C.bg : C.white45,
+                    }}>{f.count}</span>
+                  )}
+                </button>
+              )
+            })}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+          {/* Group toggle */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
             <button onClick={() => setGroupByCourt(v => !v)} style={{
-              padding: '4px 10px', fontSize: 10, fontWeight: 600,
+              padding: '5px 12px', fontSize: 10, fontWeight: 600,
               borderRadius: 6, cursor: 'pointer',
-              border: `1px solid ${groupByCourt ? G : BORDER}`,
-              background: groupByCourt ? G : 'var(--card-bg)',
-              color: groupByCourt ? 'var(--card-bg)' : 'var(--text-muted)',
+              border: `1px solid ${groupByCourt ? C.green : C.white12}`,
+              background: groupByCourt ? C.green : 'transparent',
+              color: groupByCourt ? C.white : C.white35,
+              transition: 'all .15s',
             }}>
-              {groupByCourt ? 'Agrupado por cancha' : 'Lista simple'}
+              {groupByCourt ? 'Por cancha' : 'Lista'}
             </button>
           </div>
 
           {visible.length === 0 ? (
-            <div className="empty-state" style={{ padding: '32px 16px' }}>
-              <div className="icon" style={{ fontSize: 32 }}>
-                {filter === 'jugando' ? '⏳' : filter === 'suspendido' ? '⏸️' : filter === 'por_jugar' ? '🎾' : '✓'}
+            <div style={{ textAlign: 'center', padding: '48px 16px' }}>
+              <div style={{ fontSize: 28, marginBottom: 10, opacity: .25 }}>
+                {filter === 'jugando' ? '⏳' : filter === 'suspendido' ? '⏸' : filter === 'por_jugar' ? '🎾' : '✓'}
               </div>
-              <p>
+              <p style={{ color: C.white25, fontSize: 12 }}>
                 {filter === 'jugando'    ? 'No hay partidos en curso ahora.' :
                  filter === 'suspendido' ? 'No hay partidos suspendidos.' :
                  filter === 'por_jugar'  ? 'No hay partidos pendientes.' :
@@ -199,38 +281,32 @@ export default function TodayPage() {
             </div>
           ) : (
             <>
-              {/* Reanudados (partidos de días anteriores) */}
+              {/* Reanudados */}
               {otherMatches.length > 0 && (
-                <>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#E65100', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em' }}>
-                    Reanudados ({otherMatches.length})
-                  </div>
+                <div style={{ marginTop: 8 }}>
+                  <SectionLabel text="Reanudados" color={C.orange} count={otherMatches.length} />
                   {renderGroup(otherMatches)}
-                </>
+                </div>
               )}
 
               {/* Hoy */}
               {todayMatches.length > 0 && (
-                <>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em', marginTop: otherMatches.length > 0 ? 16 : 0 }}>
-                    Hoy ({todayMatches.length})
-                  </div>
+                <div style={{ marginTop: otherMatches.length > 0 ? 16 : 8 }}>
+                  <SectionLabel text="Hoy" color={C.white35} count={todayMatches.length} />
                   {renderGroup(todayMatches)}
-                </>
+                </div>
               )}
 
               {/* Mañana */}
               {tomorrowMatches.length > 0 && (
-                <>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.05em', marginTop: (otherMatches.length > 0 || todayMatches.length > 0) ? 8 : 0 }}>
-                    Mañana ({tomorrowMatches.length})
-                  </div>
+                <div style={{ marginTop: 16 }}>
+                  <SectionLabel text="Mañana" color={C.white35} count={tomorrowMatches.length} />
                   {renderGroup(tomorrowMatches)}
-                </>
+                </div>
               )}
             </>
           )}
-        </>
+        </div>
       )}
     </div>
   )

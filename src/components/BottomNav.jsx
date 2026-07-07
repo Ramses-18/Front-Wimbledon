@@ -70,11 +70,15 @@ export default function BottomNav() {
     ? [...TABS, ADMIN_TAB]
     : TABS
 
+  // Dark mode when on Today page (matches dark Centre Court design)
+  const isDark = pathname === '/'
+
   return (
     <nav style={{
       position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
       width: '100%', maxWidth: 430,
-      background: 'var(--card-bg)', borderTop: '1px solid var(--border)',
+      background: isDark ? '#0a1a0f' : 'var(--card-bg)',
+      borderTop: `1px solid ${isDark ? 'rgba(255,255,255,.06)' : 'var(--border)'}`,
       display: 'flex', zIndex: 100, height: 60,
     }}>
       {tabs.map(t => {
@@ -87,7 +91,9 @@ export default function BottomNav() {
               flex: 1, border: 'none', background: 'none',
               cursor: 'pointer', display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center', gap: 3,
-              color: active ? 'var(--green)' : 'var(--text-muted)',
+              color: active
+                ? (isDark ? '#4CAF50' : 'var(--green)')
+                : (isDark ? 'rgba(255,255,255,.3)' : 'var(--text-muted)'),
               fontSize: 10, fontWeight: active ? 700 : 500,
               position: 'relative',
             }}
@@ -97,7 +103,7 @@ export default function BottomNav() {
               <div style={{
                 position: 'absolute', top: 6,
                 width: 4, height: 4, borderRadius: 2,
-                background: 'var(--green)',
+                background: isDark ? '#4CAF50' : 'var(--green)',
               }} />
             )}
             {t.icon}
