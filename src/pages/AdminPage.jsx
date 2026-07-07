@@ -2,7 +2,24 @@ import React, { useEffect, useState } from 'react'
 import { api } from '../context/AuthContext.jsx'
 import { useToast } from '../context/ToastContext.jsx'
 
-const G = 'var(--green)'
+const C = {
+  bg:         '#0a1a0f',
+  green:      '#4CAF50',
+  greenDeep:  '#1B5E20',
+  greenPale:  'rgba(76,175,80,.08)',
+  white:      '#fff',
+  white50:    'rgba(255,255,255,.50)',
+  white35:    'rgba(255,255,255,.35)',
+  white25:    'rgba(255,255,255,.25)',
+  white18:    'rgba(255,255,255,.18)',
+  white12:    'rgba(255,255,255,.12)',
+  white06:    'rgba(255,255,255,.06)',
+  gold:       '#C8A951',
+  red:        '#f44336',
+  orange:     '#FF9800',
+  blue:       '#64B5F6',
+}
+const G = C.green
 const COURTS = ['Centre Court','Court 1','Court 2','Court 3','Court 4','Court 5','Court 6','Court 7','Court 8','Court 9','Court 10','Court 11','Court 12','Court 13','Court 14','Court 15','Court 16','Court 17','Court 18','Court 19','Court 20']
 const ROUNDS = ['R128','R64','R32','R16','QF','SF','F']
 
@@ -69,30 +86,30 @@ function ResultModal({ match, onClose, onSaved }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-sheet" onClick={e => e.stopPropagation()}>
-        <div className="modal-handle" />
-        <div className="modal-header">
-          <div className="modal-title">Cargar resultado final</div>
-          <button className="modal-close" onClick={onClose}>×</button>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={onClose}>
+      <div style={{ background: '#111', borderRadius: '20px 20px 0 0', padding: '12px 20px 32px', width: '100%', maxWidth: 430, maxHeight: '70vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: C.white18, margin: '0 auto 16px' }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.white50 }}>Cargar resultado final</div>
+          <button onClick={onClose} style={{ background: C.white06, border: 'none', color: C.white35, width: 28, height: 28, borderRadius: '50%', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
         </div>
-        <p className="text-muted mb-12">
+        <p style={{ fontSize: 12, color: C.white25, marginBottom: 12 }}>
           {match.player1} vs {match.player2}
           <br />
-          <span style={{ fontSize: 11 }}>
+          <span style={{ fontSize: 11, color: C.white18 }}>
             {match.court} · {match.round}
             {match.orderInCourt && ` · Partido #${match.orderInCourt}`}
           </span>
         </p>
 
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>Ganador</div>
+        <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Ganador</div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
           {[match.player1, match.player2].map(p => (
             <button key={p} onClick={() => setForm(f => ({ ...f, winner: p }))} style={{
-              flex: 1, padding: '10px 6px', borderRadius: 8, cursor: 'pointer',
-              border: `1px solid ${form.winner === p ? G : 'var(--border)'}`,
-              background: form.winner === p ? G : 'var(--card-bg)',
-              color: form.winner === p ? 'white' : 'var(--text)',
+              flex: 1, padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+              border: `1px solid ${form.winner === p ? C.green : C.white12}`,
+              background: form.winner === p ? C.green : 'transparent',
+              color: form.winner === p ? '#fff' : C.white35,
               fontSize: 13, fontWeight: 600,
             }}>
               {p}
@@ -102,18 +119,18 @@ function ResultModal({ match, onClose, onSaved }) {
 
         {form.winner && !form.retired && (
           <>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Resultado por set</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Resultado por set</div>
             <div style={{ display: 'grid', gridTemplateColumns: '60px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
               <div />
               {['Set 1','Set 2','Set 3','Set 4','Set 5'].map(s => (
-                <div key={s} style={{ fontSize: 9, color: 'var(--text-muted)', textAlign: 'center', fontWeight: 600 }}>{s}</div>
+                <div key={s} style={{ fontSize: 9, color: C.white18, textAlign: 'center', fontWeight: 600 }}>{s}</div>
               ))}
             </div>
             {['w','l'].map((side) => (
               <div key={side} style={{ display: 'grid', gridTemplateColumns: '60px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
                 <div style={{
                   fontSize: 10, fontWeight: 600,
-                  color: side === 'w' ? G : 'var(--text-muted)',
+                  color: side === 'w' ? C.green : C.white35,
                   display: 'flex', alignItems: 'center', overflow: 'hidden',
                 }}>
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -128,16 +145,16 @@ function ResultModal({ match, onClose, onSaved }) {
                     style={{
                       height: 32, borderRadius: 5, textAlign: 'center',
                       fontSize: 13, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
-                      border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : 'var(--border)'}`,
-                      background: s[side] !== '' && side === 'w' ? 'rgba(46,125,50,0.18)' : 'var(--input-bg)',
-                      color: s[side] !== '' ? (side === 'w' ? G : 'var(--text-mid)') : 'var(--text-muted)',
+                      border: `1px solid ${s[side] !== '' && side === 'w' ? 'rgba(76,175,80,.2)' : 'rgba(255,255,255,.08)'}`,
+                      background: s[side] !== '' && side === 'w' ? 'rgba(76,175,80,.12)' : 'rgba(255,255,255,.04)',
+                      color: s[side] !== '' ? (side === 'w' ? C.green : C.white35) : C.white18,
                     }}
                   />
                 ))}
               </div>
             ))}
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8, marginBottom: 14 }}>
-              Sets: <strong>{countSetsWinner().setsWinner ?? 0}-{countSetsWinner().setsLoser ?? 0}</strong>
+            <div style={{ fontSize: 11, color: C.white18, marginTop: 8, marginBottom: 14 }}>
+              Sets: <strong style={{ color: C.white50 }}>{countSetsWinner().setsWinner ?? 0}-{countSetsWinner().setsLoser ?? 0}</strong>
             </div>
           </>
         )}
@@ -145,9 +162,9 @@ function ResultModal({ match, onClose, onSaved }) {
         {/* Opcion de retiro */}
         {form.winner && (
           <div style={{
-            marginBottom: 14, padding: '10px 12px', borderRadius: 8,
-            border: `1px solid ${form.retired ? '#9C27B0' : 'var(--border)'}`,
-            background: form.retired ? 'rgba(156,39,176,0.08)' : 'var(--card-bg)',
+            marginBottom: 14, padding: '10px 12px', borderRadius: 10,
+            border: `1px solid ${form.retired ? 'rgba(156,39,176,.3)' : C.white12}`,
+            background: form.retired ? 'rgba(156,39,176,.05)' : 'transparent',
           }}>
             <label style={{
               display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13,
@@ -159,10 +176,10 @@ function ResultModal({ match, onClose, onSaved }) {
                 style={{ width: 18, height: 18, accentColor: '#9C27B0' }}
               />
               <div>
-                <div style={{ fontWeight: 600, color: form.retired ? '#9C27B0' : 'var(--text)' }}>
+                <div style={{ fontWeight: 600, color: form.retired ? '#9C27B0' : C.white50 }}>
                   Un jugador se retiró
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                <div style={{ fontSize: 11, color: C.white18, marginTop: 2 }}>
                   Se guarda como retiro sin necesidad de cargar sets.
                 </div>
               </div>
@@ -170,7 +187,7 @@ function ResultModal({ match, onClose, onSaved }) {
           </div>
         )}
 
-        <button className="btn btn-primary btn-full" onClick={save} disabled={saving}>
+        <button onClick={save} disabled={saving} style={{ background: C.green, color: '#fff', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600, width: '100%', border: 'none', cursor: 'pointer' }}>
           {saving ? 'Guardando...' : form.retired ? 'Guardar como retiro' : 'Guardar resultado'}
         </button>
       </div>
@@ -215,28 +232,28 @@ function LiveScoreModal({ match, onClose, onSaved }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-sheet" onClick={e => e.stopPropagation()}>
-        <div className="modal-handle" />
-        <div className="modal-header">
-          <div className="modal-title">Cargar score en vivo</div>
-          <button className="modal-close" onClick={onClose}>×</button>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={onClose}>
+      <div style={{ background: '#111', borderRadius: '20px 20px 0 0', padding: '12px 20px 32px', width: '100%', maxWidth: 430, maxHeight: '70vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: C.white18, margin: '0 auto 16px' }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.white50 }}>Cargar score en vivo</div>
+          <button onClick={onClose} style={{ background: C.white06, border: 'none', color: C.white35, width: 28, height: 28, borderRadius: '50%', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
         </div>
-        <p className="text-muted mb-12">
+        <p style={{ fontSize: 12, color: C.white25, marginBottom: 12 }}>
           {match.player1} vs {match.player2}
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '60px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
           <div />
           {['Set 1','Set 2','Set 3','Set 4','Set 5'].map(s => (
-            <div key={s} style={{ fontSize: 9, color: 'var(--text-muted)', textAlign: 'center', fontWeight: 600 }}>{s}</div>
+            <div key={s} style={{ fontSize: 9, color: C.white18, textAlign: 'center', fontWeight: 600 }}>{s}</div>
           ))}
         </div>
         {['w','l'].map((side) => (
           <div key={side} style={{ display: 'grid', gridTemplateColumns: '60px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
             <div style={{
               fontSize: 10, fontWeight: 600,
-              color: side === 'w' ? G : 'var(--text-muted)',
+              color: side === 'w' ? C.green : C.white35,
               display: 'flex', alignItems: 'center', overflow: 'hidden',
             }}>
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -249,16 +266,16 @@ function LiveScoreModal({ match, onClose, onSaved }) {
                 style={{
                   height: 32, borderRadius: 5, textAlign: 'center',
                   fontSize: 13, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
-                  border: `0.5px solid ${s[side] !== '' && side === 'w' ? G : 'var(--border)'}`,
-                  background: s[side] !== '' && side === 'w' ? 'rgba(46,125,50,0.18)' : 'var(--input-bg)',
-                  color: s[side] !== '' ? (side === 'w' ? G : 'var(--text-mid)') : 'var(--text-muted)',
+                  border: `1px solid ${s[side] !== '' && side === 'w' ? 'rgba(76,175,80,.2)' : 'rgba(255,255,255,.08)'}`,
+                  background: s[side] !== '' && side === 'w' ? 'rgba(76,175,80,.12)' : 'rgba(255,255,255,.04)',
+                  color: s[side] !== '' ? (side === 'w' ? C.green : C.white35) : C.white18,
                 }}
               />
             ))}
           </div>
         ))}
 
-        <button className="btn btn-primary btn-full" onClick={save} disabled={saving} style={{ marginTop: 14 }}>
+        <button onClick={save} disabled={saving} style={{ marginTop: 14, background: C.green, color: '#fff', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600, width: '100%', border: 'none', cursor: 'pointer' }}>
           {saving ? 'Guardando...' : 'Actualizar score en vivo'}
         </button>
       </div>
@@ -404,57 +421,102 @@ export default function AdminPage() {
   const bracketEmpty = bracket && bracket.matches && bracket.matches.length === 0
   const roundMatches = (bracket?.matches || []).filter(m => m.round === bracketRound)
 
-  const STATUS_COLORS = {
-    'SCHEDULED': 'var(--text-muted)', 'IN_PLAY': 'var(--danger)', 'SUSPENDED': '#FF9800',
-    'FINISHED': G, 'WALKOVER': '#9C27B0', 'RETIRED': '#9C27B0', 'ABANDONED': '#795548',
+  const STATUS_PILL = {
+    'IN_PLAY':    { bg: 'rgba(244,67,54,.12)', color: 'rgba(244,67,54,.8)' },
+    'FINISHED':   { bg: 'rgba(76,175,80,.1)', color: 'rgba(76,175,80,.7)' },
+    'SCHEDULED':  { bg: 'rgba(255,255,255,.04)', color: 'rgba(255,255,255,.25)' },
+    'SUSPENDED':  { bg: 'rgba(255,152,0,.1)', color: 'rgba(255,152,0,.7)' },
+    'WALKOVER':   { bg: 'rgba(156,39,176,.1)', color: 'rgba(156,39,176,.7)' },
+    'RETIRED':    { bg: 'rgba(156,39,176,.1)', color: 'rgba(156,39,176,.7)' },
+    'ABANDONED':  { bg: 'rgba(121,85,72,.1)', color: 'rgba(121,85,72,.7)' },
   }
 
+  const actionBtn = (variant) => ({
+    padding: '10px 4px', fontSize: 10, fontWeight: 600,
+    border: '1px solid rgba(255,255,255,.05)', borderRadius: 10,
+    cursor: 'pointer', background: 'rgba(255,255,255,.02)',
+    color: 'rgba(255,255,255,.35)', transition: 'all .15s',
+    ...(variant === 'primary' ? {
+      background: 'rgba(76,175,80,.08)', borderColor: 'rgba(76,175,80,.15)', color: 'rgba(76,175,80,.7)',
+    } : {}),
+    ...(variant === 'blue' ? {
+      background: 'rgba(100,181,246,.05)', borderColor: 'rgba(100,181,246,.1)', color: 'rgba(100,181,246,.6)',
+    } : {}),
+    ...(variant === 'danger' ? {
+      background: 'rgba(244,67,54,.05)', borderColor: 'rgba(244,67,54,.1)', color: 'rgba(244,67,54,.5)',
+    } : {}),
+    ...(variant === 'orange' ? {
+      background: 'rgba(255,152,0,.08)', borderColor: 'rgba(255,152,0,.12)', color: 'rgba(255,152,0,.7)',
+    } : {}),
+  })
+
+  const Dot = () => <span style={{ width: 2, height: 2, borderRadius: '50%', background: C.white06, display: 'inline-block', margin: '0 4px' }} />
+
   return (
-    <div style={{ padding: '20px 16px' }}>
-      <h2 style={{ marginBottom: 6, fontSize: 20 }}>Panel de administrador</h2>
-      <p className="text-muted" style={{ marginBottom: 20, fontSize: 13 }}>Gestión de partidos y resultados</p>
+    <div style={{ background: C.bg, minHeight: '100vh', position: 'relative' }}>
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: C.greenDeep, zIndex: 1 }} />
+      <div style={{ position: 'relative', zIndex: 1, padding: '24px 16px 100px' }}>
+
+      <div style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 300, color: C.white50, letterSpacing: '.04em' }}>
+        Panel de administrador
+        <div style={{ fontSize: 10, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 4 }}>
+          Gestión de partidos y resultados
+        </div>
+      </div>
 
       {/* Agregar partido */}
-      <div style={{ marginBottom: 20 }}>
-        <button className="btn btn-primary btn-full" style={{ background: showAddForm ? 'var(--danger)' : G }}
-          onClick={() => setShowAddForm(f => !f)}>
+      <div style={{ marginBottom: 20, marginTop: 20 }}>
+        <button
+          onClick={() => setShowAddForm(f => !f)}
+          style={{
+            width: '100%', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600,
+            background: showAddForm ? 'transparent' : 'rgba(255,255,255,.04)',
+            border: showAddForm ? '1px solid rgba(244,67,54,.2)' : '1px solid rgba(255,255,255,.08)',
+            color: showAddForm ? 'rgba(244,67,54,.7)' : C.white50,
+            cursor: 'pointer',
+          }}>
           {showAddForm ? '✕ Cerrar' : '+ Agregar partido'}
         </button>
       </div>
 
       {/* Add match form — oculto hasta que apriete el botón */}
       {showAddForm && (
-      <div className="card" style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 20, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.06)', borderRadius: 14, padding: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
           <div>
-            <label>Fecha</label>
+            <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Fecha</label>
             <input type="date" value={newMatch.matchDate}
-              onChange={e => setNewMatch(n => ({ ...n, matchDate: e.target.value }))} />
+              onChange={e => setNewMatch(n => ({ ...n, matchDate: e.target.value }))}
+              style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px' }} />
           </div>
           <div>
-            <label>Hora (opcional)</label>
+            <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Hora (opcional)</label>
             <input type="time" value={newMatch.matchTime}
-              onChange={e => setNewMatch(n => ({ ...n, matchTime: e.target.value }))} />
+              onChange={e => setNewMatch(n => ({ ...n, matchTime: e.target.value }))}
+              style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px' }} />
           </div>
         </div>
         <div style={{ marginBottom: 12 }}>
-          <label>Cancha</label>
+          <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Cancha</label>
           <select value={newMatch.court}
-            onChange={e => setNewMatch(n => ({ ...n, court: e.target.value, followsMatchId: '' }))}>
+            onChange={e => setNewMatch(n => ({ ...n, court: e.target.value, followsMatchId: '' }))}
+            style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px' }}>
             {COURTS.map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
         <div style={{ marginBottom: 12 }}>
-          <label>Ronda</label>
+          <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Ronda</label>
           <select value={newMatch.round}
-            onChange={e => setNewMatch(n => ({ ...n, round: e.target.value }))}>
+            onChange={e => setNewMatch(n => ({ ...n, round: e.target.value }))}
+            style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px' }}>
             {ROUNDS.map(r => <option key={r}>{r}</option>)}
           </select>
         </div>
         <div style={{ marginBottom: 12 }}>
-          <label>¿Sigue a otro partido en la misma cancha?</label>
+          <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>¿Sigue a otro partido en la misma cancha?</label>
           <select value={newMatch.followsMatchId}
-            onChange={e => setNewMatch(n => ({ ...n, followsMatchId: e.target.value }))}>
+            onChange={e => setNewMatch(n => ({ ...n, followsMatchId: e.target.value }))}
+            style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px' }}>
             <option value="">— No, es el primero —</option>
             {courtMatchesForFollows.map(m => (
               <option key={m.id} value={m.id}>#{m.orderInCourt}: {m.player1} vs {m.player2}</option>
@@ -462,16 +524,18 @@ export default function AdminPage() {
           </select>
         </div>
         <div style={{ marginBottom: 12 }}>
-          <label>Jugador 1</label>
+          <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Jugador 1</label>
           <input type="text" placeholder="Escribí el nombre completo" value={newMatch.player1}
-            onChange={e => setNewMatch(n => ({ ...n, player1: e.target.value }))} />
+            onChange={e => setNewMatch(n => ({ ...n, player1: e.target.value }))}
+            style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px' }} />
         </div>
         <div style={{ marginBottom: 14 }}>
-          <label>Jugador 2</label>
+          <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Jugador 2</label>
           <input type="text" placeholder="Escribí el nombre completo" value={newMatch.player2}
-            onChange={e => setNewMatch(n => ({ ...n, player2: e.target.value }))} />
+            onChange={e => setNewMatch(n => ({ ...n, player2: e.target.value }))}
+            style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px' }} />
         </div>
-        <button className="btn btn-primary btn-full" onClick={addMatch}>+ Agregar partido</button>
+        <button onClick={addMatch} style={{ width: '100%', background: C.green, color: '#fff', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer' }}>+ Agregar partido</button>
       </div>
       )}
 
@@ -484,113 +548,124 @@ export default function AdminPage() {
         const tomorrowM = matches.filter(m => m.matchDate === tomorrowStr)
         const upcomingM = matches.filter(m => m.matchDate > tomorrowStr)
         const activePastM = matches.filter(m => m.matchDate < todayStr && (m.status === 'IN_PLAY' || m.status === 'SUSPENDED'))
+        const todayHasLive = todayM.some(m => m.status === 'IN_PLAY' || m.status === 'SUSPENDED')
 
         const renderMatchList = (list) => list.length === 0
-          ? <p style={{ padding: 16, fontSize: 13, color: 'var(--text-muted)' }}>No hay partidos.</p>
-          : list.map((m, i) => (
+          ? <p style={{ padding: 24, fontSize: 12, color: C.white18, textAlign: 'center' }}>No hay partidos.</p>
+          : list.map((m, i) => {
+            const isLive = m.status === 'IN_PLAY' || m.status === 'SUSPENDED'
+            const pill = STATUS_PILL[m.status] || STATUS_PILL.SCHEDULED
+            const hasResult = m.status === 'FINISHED' && m.result
+            return (
           <div key={m.id} style={{
-            padding: '14px 16px',
-            borderBottom: i < list.length - 1 ? '1px solid var(--border)' : 'none',
+            background: isLive ? 'rgba(244,67,54,.02)' : 'rgba(255,255,255,.03)',
+            border: `1px solid ${isLive ? 'rgba(244,67,54,.12)' : 'rgba(255,255,255,.05)'}`,
+            borderRadius: 14,
+            padding: 16,
+            marginBottom: 8,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{
-                fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                background: STATUS_COLORS[m.status] || 'var(--text-muted)', color: '#fff',
-              }}>
-                {m.status || 'SCHEDULED'}
-              </span>
-              {m.orderInCourt && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>#{m.orderInCourt} · {m.court}</span>}
-              {m.deadlineForced && <span style={{ fontSize: 10, color: 'var(--danger)' }}>cerrado</span>}
-              {m.result && <span style={{ fontSize: 10, color: G, fontWeight: 700 }}>· score</span>}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 700 }}>{m.player1} vs {m.player2}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {m.matchTime ? `${m.matchTime.slice(0,5)} hs` : 'Sin horario'} · {m.round}
-                </div>
+            {/* Top row: players + status pill */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+              <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,.7)', letterSpacing: '-.01em' }}>
+                {m.player1} vs {m.player2}
               </div>
-              <button onClick={() => setModal(m)} style={{
-                background: m.result ? 'var(--green-light)' : 'var(--card-bg)',
-                border: `1px solid ${m.result ? 'var(--green-mid)' : 'var(--border)'}`,
-                borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 600,
-                cursor: 'pointer', color: m.result ? G : 'var(--text-mid)',
+              <span style={{
+                padding: '4px 10px', borderRadius: 20, fontSize: 8, fontWeight: 700,
+                letterSpacing: '.08em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+                background: pill.bg, color: pill.color,
               }}>
-                {m.result ? '✓' : 'Final'}
-              </button>
-              <button onClick={() => deleteMatch(m.id)} style={{
-                background: 'var(--danger-bg)', border: '1px solid var(--danger)', borderRadius: 8,
-                padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--danger)',
-              }}>✕</button>
+                {m.status === 'IN_PLAY' ? 'EN JUEGO' : m.status === 'FINISHED' ? 'FINALIZADO' : m.status === 'SUSPENDED' ? 'SUSPENDIDO' : m.status === 'WALKOVER' ? 'WO' : m.status === 'RETIRED' ? 'RETIRO' : m.status || 'PROGRAMADO'}
+              </span>
             </div>
 
-            {m.status === 'SCHEDULED' && (
-              <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+            {/* Info row */}
+            <div style={{ marginBottom: 14, fontSize: 10, color: 'rgba(255,255,255,.18)', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0 }}>
+              {m.orderInCourt && <span>#{m.orderInCourt}</span>}
+              {m.orderInCourt && m.court && <Dot />}
+              {m.court && <span>{m.court}</span>}
+              {m.court && m.matchTime && <Dot />}
+              {m.matchTime && <span>{m.matchTime.slice(0,5)} hs</span>}
+              {(m.court || m.matchTime) && <Dot />}
+              <span>{m.round}</span>
+              {m.deadlineForced && (
+                <>
+                  <Dot />
+                  <span style={{ color: C.red, fontWeight: 600 }}>cerrado</span>
+                </>
+              )}
+              {m.result && (
+                <>
+                  <Dot />
+                  <span style={{ color: C.green, fontWeight: 600 }}>score</span>
+                </>
+              )}
+            </div>
+
+            {/* Action Grid */}
+            {hasResult ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                <button onClick={() => setModal(m)} style={actionBtn('primary')}>Ver score</button>
+                <button onClick={() => deleteMatch(m.id)} style={actionBtn('danger')}>Eliminar</button>
+                <div style={{ visibility: 'hidden' }} />
+              </div>
+            ) : m.status === 'SCHEDULED' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                 {!m.deadlineForced && (
-                  <button onClick={() => forceDeadline(m.id)} style={statusBtnStyle('var(--danger)')}>
-                    Cerrar pronóstico
-                  </button>
+                  <button onClick={() => forceDeadline(m.id)} style={actionBtn('orange')}>Cerrar pronóstico</button>
                 )}
                 {m.deadlineForced && (
-                  <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('var(--green-mid)')}>
-                    Iniciar partido
-                  </button>
+                  <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={actionBtn('primary')}>Iniciar</button>
                 )}
-                <button onClick={() => forceStart(m.id)} style={statusBtnStyle('#C62828')} disabled={m.deadlineForced}>
-                  Cerrar + Empezar
+                <button onClick={() => forceStart(m.id)} style={actionBtn('primary')} disabled={m.deadlineForced}>
+                  Cerrar+Empezar
                 </button>
+                <button onClick={() => deleteMatch(m.id)} style={actionBtn('danger')}>Eliminar</button>
               </div>
-            )}
-            {m.status === 'IN_PLAY' && (
-              <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-                <button onClick={() => setLiveModal(m)} style={statusBtnStyle('#1565C0')}>
-                  Score en vivo
-                </button>
-                <button onClick={() => setModal(m)} style={statusBtnStyle(G)}>
-                  Finalizar
-                </button>
-                <button onClick={() => changeStatus(m.id, 'SUSPENDED')} style={statusBtnStyle('#FF9800')}>
-                  Suspender
-                </button>
+            ) : m.status === 'IN_PLAY' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                <button onClick={() => setModal(m)} style={actionBtn('primary')}>Finalizar</button>
+                <button onClick={() => setLiveModal(m)} style={actionBtn('blue')}>Score en vivo</button>
+                <button onClick={() => changeStatus(m.id, 'SUSPENDED')} style={actionBtn('orange')}>Suspender</button>
               </div>
-            )}
-            {m.status === 'SUSPENDED' && (
-              <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-                <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={statusBtnStyle('var(--danger)')}>
-                  Reanudar
-                </button>
-                <button onClick={() => setModal(m)} style={statusBtnStyle(G)}>Finalizar</button>
+            ) : m.status === 'SUSPENDED' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={actionBtn('primary')}>Reanudar</button>
+                <button onClick={() => setModal(m)} style={actionBtn('primary')}>Finalizar</button>
+                <div style={{ visibility: 'hidden' }} />
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                <div style={{ visibility: 'hidden' }} />
+                <div style={{ visibility: 'hidden' }} />
+                <button onClick={() => deleteMatch(m.id)} style={actionBtn('danger')}>Eliminar</button>
               </div>
             )}
           </div>
-        ))
+        )})
 
         return (
           <>
             {activePastM.length > 0 && (
               <>
-                <h3 style={{ marginBottom: 12, fontSize: 14, color: '#E65100', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                  Reanudados ({activePastM.length})
-                </h3>
-                <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden', borderColor: '#E65100' }}>
-                  {renderMatchList(activePastM)}
+                <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ width: 2, height: 10, borderRadius: 1, background: 'rgba(255,152,0,.6)', display: 'inline-block' }} />
+                  Reanudados <span style={{ color: C.white12, fontWeight: 400, letterSpacing: '.05em' }}>{activePastM.length}</span>
                 </div>
+                {renderMatchList(activePastM)}
               </>
             )}
 
-            <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-              Hoy ({todayM.length})
-            </h3>
-            <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
-              {renderMatchList(todayM)}
+            <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 2, height: 10, borderRadius: 1, background: todayHasLive ? 'rgba(244,67,54,.6)' : 'rgba(255,255,255,.3)', display: 'inline-block' }} />
+              Hoy <span style={{ color: C.white12, fontWeight: 400, letterSpacing: '.05em' }}>{todayM.length}</span>
             </div>
+            {renderMatchList(todayM)}
 
-            <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-              Manana ({tomorrowM.length})
-            </h3>
-            <div className="card" style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
-              {renderMatchList(tomorrowM)}
+            <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 2, height: 10, borderRadius: 1, background: 'rgba(255,255,255,.3)', display: 'inline-block' }} />
+              Mañana <span style={{ color: C.white12, fontWeight: 400, letterSpacing: '.05em' }}>{tomorrowM.length}</span>
             </div>
+            {renderMatchList(tomorrowM)}
 
             {upcomingM.length > 0 && (() => {
               const grouped = {}
@@ -598,24 +673,24 @@ export default function AdminPage() {
                 if (!grouped[m.matchDate]) grouped[m.matchDate] = []
                 grouped[m.matchDate].push(m)
               })
+
               const dateStr = (d) => {
                 const [y, mo, da] = d.split('-')
                 return new Date(y, mo - 1, da).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })
               }
               return (
                 <>
-                  <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                    Proximos dias ({upcomingM.length})
-                  </h3>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ width: 2, height: 10, borderRadius: 1, background: 'rgba(255,255,255,.3)', display: 'inline-block' }} />
+                    Próximos días <span style={{ color: C.white12, fontWeight: 400, letterSpacing: '.05em' }}>{upcomingM.length}</span>
+                  </div>
                   {Object.entries(grouped).sort().map(([date, list]) => (
                     <div key={date} style={{ marginBottom: 20 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-mid)', marginBottom: 6, paddingLeft: 4, textTransform: 'capitalize' }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: C.white50, marginBottom: 6, paddingLeft: 4, textTransform: 'capitalize' }}>
                         {dateStr(date)}
-                        <span style={{ color: 'var(--text-muted)', fontWeight: 500, marginLeft: 6 }}>· {list.length} partido{list.length > 1 ? 's' : ''}</span>
+                        <span style={{ color: C.white18, fontWeight: 500, marginLeft: 6 }}>· {list.length} partido{list.length > 1 ? 's' : ''}</span>
                       </div>
-                      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                        {renderMatchList(list)}
-                      </div>
+                      {renderMatchList(list)}
                     </div>
                   ))}
                 </>
@@ -626,46 +701,48 @@ export default function AdminPage() {
       })()}
 
       {/* Cuadro del torneo */}
-      <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ width: 2, height: 10, borderRadius: 1, background: C.white35, display: 'inline-block' }} />
         Cuadro del torneo
-      </h3>
-      <div className="card" style={{ marginBottom: 24 }}>
+      </div>
+      <div style={{ marginBottom: 24 }}>
         {bracketLoading ? (
           <div className="spinner" />
         ) : bracketError ? (
           <>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>{bracketError}</p>
-            <button className="btn btn-primary btn-full" onClick={initBracket}>
-              🔧 Inicializar cuadro
+            <p style={{ fontSize: 11, color: C.white18, marginBottom: 10 }}>{bracketError}</p>
+            <button onClick={initBracket} style={{ width: '100%', background: C.green, color: '#fff', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer' }}>
+              Inicializar cuadro
             </button>
           </>
         ) : bracketEmpty ? (
           <>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
+            <p style={{ fontSize: 11, color: C.white18, marginBottom: 10 }}>
               El cuadro aún no tiene partidos. Inicializalo para crear la estructura (R16 → Final).
             </p>
-            <button className="btn btn-primary btn-full" onClick={initBracket}>
-              🔧 Inicializar cuadro (15 partidos)
+            <button onClick={initBracket} style={{ width: '100%', background: C.green, color: '#fff', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer' }}>
+              Inicializar cuadro (15 partidos)
             </button>
           </>
         ) : (
           <>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
+            <p style={{ fontSize: 11, color: C.white18, marginBottom: 10 }}>
               Elegí una ronda para editar los partidos. Cuando seteás un ganador, se propaga automáticamente al partido siguiente.
             </p>
             {/* Selector de ronda */}
             <div style={{ display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', paddingBottom: 4 }}>
               {(bracket?.rounds || []).map(r => {
                 const count = (bracket?.matches || []).filter(m => m.round === r.key && (m.player1 || m.player2)).length
+                const on = bracketRound === r.key
                 return (
                   <button key={r.key} onClick={() => setBracketRound(r.key)} style={{
-                    padding: '6px 10px', fontSize: 10, fontWeight: 600, borderRadius: 5,
-                    border: `1px solid ${bracketRound === r.key ? G : 'var(--border)'}`,
-                    background: bracketRound === r.key ? G : 'var(--card-bg)',
-                    color: bracketRound === r.key ? 'white' : 'var(--text-muted)',
+                    padding: '6px 10px', fontSize: 10, fontWeight: 600, borderRadius: 6,
+                    border: `1px solid ${on ? C.green : C.white12}`,
+                    background: on ? C.green : 'transparent',
+                    color: on ? '#fff' : C.white35,
                     cursor: 'pointer', whiteSpace: 'nowrap',
                   }}>
-                    {r.label || r.key} ({count}/{r.count})
+                    {r.label || r.key} <span style={{ background: on ? 'rgba(255,255,255,.2)' : C.white06, fontSize: 8, borderRadius: 3, padding: '1px 4px', marginLeft: 2 }}>{count}/{r.count}</span>
                   </button>
                 )
               })}
@@ -673,32 +750,32 @@ export default function AdminPage() {
             {/* Lista de partidos de la ronda seleccionada */}
             <div style={{ maxHeight: 500, overflowY: 'auto' }}>
               {roundMatches.length === 0 ? (
-                <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', padding: 16 }}>
+                <p style={{ fontSize: 12, color: C.white18, textAlign: 'center', padding: 24 }}>
                   No hay partidos en esta ronda.
                 </p>
               ) : (
                 roundMatches.map(m => (
                   <div key={m.id} style={{
-                    padding: '10px 12px', marginBottom: 6, borderRadius: 6,
-                    border: `1px solid ${m.winner ? 'var(--green-mid)' : 'var(--border)'}`,
-                    background: m.winner ? 'var(--green-pale)' : 'var(--card-bg)',
+                    padding: '10px 12px', marginBottom: 6, borderRadius: 10,
+                    border: `1px solid ${m.winner ? 'rgba(76,175,80,.15)' : 'rgba(255,255,255,.05)'}`,
+                    background: m.winner ? 'rgba(76,175,80,.03)' : 'rgba(255,255,255,.02)',
                     cursor: 'pointer',
                   }} onClick={() => setBracketModal(m)}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: m.winner === m.player1 ? G : 'var(--text)' }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: m.winner === m.player1 ? C.green : 'rgba(255,255,255,.5)' }}>
                           {m.winner === m.player1 ? '✓ ' : ''}{m.player1 || '—'}
-                          {m.scoreStr && m.winner === m.player1 && <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 4 }}>{m.scoreStr}</span>}
+                          {m.scoreStr && m.winner === m.player1 && <span style={{ fontSize: 10, color: C.white18, marginLeft: 4 }}>{m.scoreStr}</span>}
                         </div>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: m.winner === m.player2 ? G : 'var(--text)' }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: m.winner === m.player2 ? C.green : 'rgba(255,255,255,.5)' }}>
                           {m.winner === m.player2 ? '✓ ' : ''}{m.player2 || '—'}
-                          {m.scoreStr && m.winner === m.player2 && <span style={{ fontSize: 10, color: 'var(--text-muted)', marginLeft: 4 }}>{m.scoreStr}</span>}
+                          {m.scoreStr && m.winner === m.player2 && <span style={{ fontSize: 10, color: C.white18, marginLeft: 4 }}>{m.scoreStr}</span>}
                         </div>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-                        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>#{m.positionInRound}</span>
+                        <span style={{ fontSize: 10, color: C.white18 }}>#{m.positionInRound}</span>
                         {m.status === 'FINISHED' && (
-                          <span style={{ fontSize: 9, fontWeight: 700, color: G, padding: '1px 6px', borderRadius: 4, background: 'var(--green-light)' }}>
+                          <span style={{ fontSize: 9, fontWeight: 700, color: C.green, padding: '1px 6px', borderRadius: 4, background: 'rgba(76,175,80,.1)' }}>
                             {m.setsWinner}-{m.setsLoser}
                           </span>
                         )}
@@ -713,23 +790,26 @@ export default function AdminPage() {
       </div>
 
       {/* Tournament result */}
-      <h3 style={{ marginBottom: 12, fontSize: 14, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ width: 2, height: 10, borderRadius: 1, background: C.white35, display: 'inline-block' }} />
         Resultado del torneo
-      </h3>
-      <div className="card" style={{ marginBottom: 24 }}>
+      </div>
+      <div style={{ marginBottom: 24, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.06)', borderRadius: 14, padding: 16 }}>
         <div style={{ marginBottom: 10 }}>
-          <label>Campeón real</label>
+          <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Campeón real</label>
           <input type="text" placeholder="Nombre del campeón" value={tResult.champion || ''}
-            onChange={e => setTResult(r => ({ ...r, champion: e.target.value }))} />
+            onChange={e => setTResult(r => ({ ...r, champion: e.target.value }))}
+            style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px' }} />
         </div>
         {[0,1,2,3].map(i => (
           <div key={i} style={{ marginBottom: 8 }}>
-            <label>Semifinalista {i+1}</label>
+            <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Semifinalista {i+1}</label>
             <input type="text" placeholder="Nombre" value={tResult.semis?.[i] || ''}
-              onChange={e => setTSemi(i)(e.target.value)} />
+              onChange={e => setTSemi(i)(e.target.value)}
+              style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px' }} />
           </div>
         ))}
-        <button className="btn btn-primary btn-full mt-12" onClick={saveTResult} disabled={savingT}>
+        <button onClick={saveTResult} disabled={savingT} style={{ marginTop: 12, width: '100%', background: C.green, color: '#fff', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer' }}>
           {savingT ? 'Guardando...' : 'Guardar resultado del torneo'}
         </button>
       </div>
@@ -743,6 +823,8 @@ export default function AdminPage() {
           onSaved={() => { setBracketModal(null); loadBracket() }}
         />
       )}
+
+      </div>
     </div>
   )
 }
@@ -868,41 +950,43 @@ function BracketEditorModal({ match, onClose, onSaved }) {
     : ''
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-sheet" onClick={e => e.stopPropagation()}>
-        <div className="modal-handle" />
-        <div className="modal-header">
-          <div className="modal-title">{roundLabels[match.round] || match.round} · Partido #{match.positionInRound}</div>
-          <button className="modal-close" onClick={onClose}>×</button>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={onClose}>
+      <div style={{ background: '#111', borderRadius: '20px 20px 0 0', padding: '12px 20px 32px', width: '100%', maxWidth: 430, maxHeight: '70vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: C.white18, margin: '0 auto 16px' }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.white50 }}>{roundLabels[match.round] || match.round} · Partido #{match.positionInRound}</div>
+          <button onClick={onClose} style={{ background: C.white06, border: 'none', color: C.white35, width: 28, height: 28, borderRadius: '50%', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
         </div>
-        <p className="text-muted mb-12">
+        <p style={{ fontSize: 12, color: C.white25, marginBottom: 12 }}>
           Cargá los jugadores y el resultado por sets. El ganador se determina automáticamente.
         </p>
 
-        <div className="form-group">
-          <label>Jugador 1</label>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Jugador 1</label>
           <input type="text" placeholder="Nombre completo" value={form.player1}
-            onChange={e => setForm(f => ({ ...f, player1: e.target.value }))} />
+            onChange={e => setForm(f => ({ ...f, player1: e.target.value }))}
+            style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px', outline: 'none' }} />
         </div>
-        <div className="form-group">
-          <label>Jugador 2</label>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Jugador 2</label>
           <input type="text" placeholder="Nombre completo" value={form.player2}
-            onChange={e => setForm(f => ({ ...f, player2: e.target.value }))} />
+            onChange={e => setForm(f => ({ ...f, player2: e.target.value }))}
+            style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, color: C.white50, fontSize: 13, padding: '10px 12px', outline: 'none' }} />
         </div>
 
         {form.player1 && form.player2 && (
           <>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Resultado por set</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4, display: 'block' }}>Resultado por set</div>
             <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
               <div />
               {['Set 1','Set 2','Set 3','Set 4','Set 5'].map(s => (
-                <div key={s} style={{ fontSize: 9, color: 'var(--text-muted)', textAlign: 'center', fontWeight: 600 }}>{s}</div>
+                <div key={s} style={{ fontSize: 9, color: C.white18, textAlign: 'center', fontWeight: 600 }}>{s}</div>
               ))}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
               <div style={{
                 fontSize: 10, fontWeight: 600,
-                color: autoWinner === form.player1 ? G : 'var(--text-mid)',
+                color: autoWinner === form.player1 ? C.green : C.white35,
                 display: 'flex', alignItems: 'center', overflow: 'hidden',
               }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 9 }}>
@@ -915,9 +999,9 @@ function BracketEditorModal({ match, onClose, onSaved }) {
                   style={{
                     height: 34, borderRadius: 5, textAlign: 'center',
                     fontSize: 14, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
-                    border: `0.5px solid ${s.w !== '' ? G : 'var(--border)'}`,
-                    background: s.w !== '' ? 'rgba(46,125,50,0.18)' : 'var(--input-bg)',
-                    color: s.w !== '' ? G : 'var(--text-muted)',
+                    border: `1px solid ${s.w !== '' ? 'rgba(76,175,80,.2)' : 'rgba(255,255,255,.08)'}`,
+                    background: s.w !== '' ? 'rgba(76,175,80,.12)' : 'rgba(255,255,255,.04)',
+                    color: s.w !== '' ? C.green : C.white18,
                   }}
                 />
               ))}
@@ -925,7 +1009,7 @@ function BracketEditorModal({ match, onClose, onSaved }) {
             <div style={{ display: 'grid', gridTemplateColumns: '70px repeat(5, 1fr)', gap: 4, marginBottom: 4 }}>
               <div style={{
                 fontSize: 10, fontWeight: 600,
-                color: autoWinner === form.player2 ? G : 'var(--text-mid)',
+                color: autoWinner === form.player2 ? C.green : C.white35,
                 display: 'flex', alignItems: 'center', overflow: 'hidden',
               }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 9 }}>
@@ -938,9 +1022,9 @@ function BracketEditorModal({ match, onClose, onSaved }) {
                   style={{
                     height: 34, borderRadius: 5, textAlign: 'center',
                     fontSize: 14, fontWeight: 700, width: '100%', padding: 0, outline: 'none',
-                    border: `0.5px solid ${s.l !== '' ? 'var(--border)' : 'var(--border)'}`,
-                    background: 'var(--input-bg)',
-                    color: s.l !== '' ? 'var(--text-mid)' : 'var(--text-muted)',
+                    border: `1px solid ${s.l !== '' ? 'rgba(255,255,255,.08)' : 'rgba(255,255,255,.08)'}`,
+                    background: 'rgba(255,255,255,.04)',
+                    color: s.l !== '' ? C.white35 : C.white18,
                   }}
                 />
               ))}
@@ -949,11 +1033,11 @@ function BracketEditorModal({ match, onClose, onSaved }) {
             {/* Resumen auto */}
             {filledSets > 0 && (
               <div style={{
-                marginTop: 10, padding: '8px 12px', borderRadius: 8,
-                background: autoWinner ? 'var(--green-pale)' : 'var(--card-bg)',
-                border: `1px solid ${autoWinner ? 'var(--green-mid)' : 'var(--border)'}`,
+                marginTop: 10, padding: '8px 12px', borderRadius: 10,
+                background: autoWinner ? 'rgba(76,175,80,.06)' : 'rgba(255,255,255,.02)',
+                border: `1px solid ${autoWinner ? 'rgba(76,175,80,.12)' : C.white12}`,
                 fontSize: 12, fontWeight: 600,
-                color: autoWinner ? G : 'var(--text-muted)',
+                color: autoWinner ? C.green : C.white18,
                 textAlign: 'center',
               }}>
                 {autoWinner
@@ -964,11 +1048,11 @@ function BracketEditorModal({ match, onClose, onSaved }) {
           </>
         )}
 
-        <button className="btn btn-primary btn-full" onClick={save} disabled={saving} style={{ marginBottom: 8, marginTop: 16 }}>
+        <button onClick={save} disabled={saving} style={{ marginBottom: 8, marginTop: 16, width: '100%', background: C.green, color: '#fff', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer' }}>
           {saving ? 'Guardando...' : 'Guardar partido'}
         </button>
         {match.winner && (
-          <button className="btn btn-danger btn-full" onClick={clearResult} disabled={saving}>
+          <button onClick={clearResult} disabled={saving} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(244,67,54,.15)', color: 'rgba(244,67,54,.6)', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             Limpiar resultado
           </button>
         )}
