@@ -435,7 +435,7 @@ export default function AdminPage() {
     padding: '10px 4px', fontSize: 10, fontWeight: 600,
     border: '1px solid rgba(255,255,255,.05)', borderRadius: 10,
     cursor: 'pointer', background: 'rgba(255,255,255,.02)',
-    color: 'rgba(255,255,255,.35)', transition: 'all .15s',
+    color: 'rgba(255,255,255,.35)', transition: 'all .15s', letterSpacing: '.01em',
     ...(variant === 'primary' ? {
       background: 'rgba(76,175,80,.08)', borderColor: 'rgba(76,175,80,.15)', color: 'rgba(76,175,80,.7)',
     } : {}),
@@ -457,9 +457,9 @@ export default function AdminPage() {
       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: C.greenDeep, zIndex: 1 }} />
       <div style={{ position: 'relative', zIndex: 1, padding: '24px 16px 100px' }}>
 
-      <div style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 300, color: C.white50, letterSpacing: '.04em' }}>
-        Panel de administrador
-        <div style={{ fontSize: 10, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 4 }}>
+      <div style={{ fontFamily: 'Georgia, serif', fontSize: 20, fontWeight: 300, color: 'rgba(255,255,255,.8)', letterSpacing: '.04em' }}>
+        Admin
+        <div style={{ fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.1em', textTransform: 'uppercase', marginTop: 4 }}>
           Gestión de partidos y resultados
         </div>
       </div>
@@ -472,8 +472,8 @@ export default function AdminPage() {
             width: '100%', borderRadius: 10, padding: 12, fontSize: 13, fontWeight: 600,
             background: showAddForm ? 'transparent' : 'rgba(255,255,255,.04)',
             border: showAddForm ? '1px solid rgba(244,67,54,.2)' : '1px solid rgba(255,255,255,.08)',
-            color: showAddForm ? 'rgba(244,67,54,.7)' : C.white50,
-            cursor: 'pointer',
+            color: showAddForm ? 'rgba(244,67,54,.7)' : 'rgba(255,255,255,.5)',
+            cursor: 'pointer', letterSpacing: '.02em',
           }}>
           {showAddForm ? '✕ Cerrar' : '+ Agregar partido'}
         </button>
@@ -554,66 +554,72 @@ export default function AdminPage() {
           ? <p style={{ padding: 24, fontSize: 12, color: C.white18, textAlign: 'center' }}>No hay partidos.</p>
           : list.map((m, i) => {
             const isLive = m.status === 'IN_PLAY' || m.status === 'SUSPENDED'
+            const isFin = m.status === 'FINISHED'
             const pill = STATUS_PILL[m.status] || STATUS_PILL.SCHEDULED
-            const hasResult = m.status === 'FINISHED' && m.result
+            const hasResult = isFin && m.result
+            const statusLabel = m.status === 'IN_PLAY' ? 'EN JUEGO' : m.status === 'FINISHED' ? 'FINALIZADO' : m.status === 'SUSPENDED' ? 'SUSPENDIDO' : m.status === 'WALKOVER' ? 'WO' : m.status === 'RETIRED' ? 'RETIRO' : m.status === 'ABANDONED' ? 'ABANDONO' : m.status || 'PROGRAMADO'
+            const winnerName = hasResult ? m.result.winner : null
+            const isP1Winner = winnerName === m.player1
+            const isP2Winner = winnerName === m.player2
             return (
           <div key={m.id} style={{
-            background: isLive ? 'rgba(244,67,54,.02)' : 'rgba(255,255,255,.03)',
-            border: `1px solid ${isLive ? 'rgba(244,67,54,.12)' : 'rgba(255,255,255,.05)'}`,
+            background: isLive ? 'rgba(244,67,54,.02)' : isFin ? 'rgba(255,255,255,.03)' : 'rgba(255,255,255,.03)',
+            border: `1px solid ${isLive ? 'rgba(244,67,54,.12)' : isFin ? 'rgba(76,175,80,.08)' : 'rgba(255,255,255,.05)'}`,
             borderRadius: 14,
             padding: 16,
             marginBottom: 8,
-          }}>
+            transition: 'all .2s',
+          }} onMouseEnter={e => { e.currentTarget.style.borderColor = isLive ? 'rgba(244,67,54,.2)' : isFin ? 'rgba(76,175,80,.14)' : 'rgba(255,255,255,.08)'; e.currentTarget.style.background = isLive ? 'rgba(244,67,54,.04)' : 'rgba(255,255,255,.045)' }} onMouseLeave={e => { e.currentTarget.style.borderColor = isLive ? 'rgba(244,67,54,.12)' : isFin ? 'rgba(76,175,80,.08)' : 'rgba(255,255,255,.05)'; e.currentTarget.style.background = isLive ? 'rgba(244,67,54,.02)' : 'rgba(255,255,255,.03)' }}>
             {/* Top row: players + status pill */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              <div style={{ flex: 1, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,.7)', letterSpacing: '-.01em' }}>
-                {m.player1} vs {m.player2}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,.7)', letterSpacing: '-.01em', lineHeight: 1.3, flex: 1, paddingRight: 10 }}>
+                <span style={isP1Winner ? { color: C.green } : {}}>{m.player1}</span>{' vs '}<span style={isP2Winner ? { color: C.green } : {}}>{m.player2}</span>
               </div>
               <span style={{
+                flexShrink: 0,
                 padding: '4px 10px', borderRadius: 20, fontSize: 8, fontWeight: 700,
                 letterSpacing: '.08em', textTransform: 'uppercase', whiteSpace: 'nowrap',
                 background: pill.bg, color: pill.color,
               }}>
-                {m.status === 'IN_PLAY' ? 'EN JUEGO' : m.status === 'FINISHED' ? 'FINALIZADO' : m.status === 'SUSPENDED' ? 'SUSPENDIDO' : m.status === 'WALKOVER' ? 'WO' : m.status === 'RETIRED' ? 'RETIRO' : m.status || 'PROGRAMADO'}
+                {statusLabel}
               </span>
             </div>
 
-            {/* Info row */}
-            <div style={{ marginBottom: 14, fontSize: 10, color: 'rgba(255,255,255,.18)', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0 }}>
+            {/* Info row with dot separators */}
+            <div style={{ marginBottom: 14, fontSize: 10, color: 'rgba(255,255,255,.18)', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
               {m.orderInCourt && <span>#{m.orderInCourt}</span>}
-              {m.orderInCourt && m.court && <Dot />}
+              {m.orderInCourt && m.court && <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,.08)', display: 'inline-block' }} />}
               {m.court && <span>{m.court}</span>}
-              {m.court && m.matchTime && <Dot />}
+              {m.court && m.matchTime && <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,.08)', display: 'inline-block' }} />}
               {m.matchTime && <span>{m.matchTime.slice(0,5)} hs</span>}
-              {(m.court || m.matchTime) && <Dot />}
+              {(m.court || m.matchTime) && <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,.08)', display: 'inline-block' }} />}
               <span>{m.round}</span>
               {m.deadlineForced && (
                 <>
-                  <Dot />
+                  <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,.08)', display: 'inline-block' }} />
                   <span style={{ color: C.red, fontWeight: 600 }}>cerrado</span>
                 </>
               )}
-              {m.result && (
+              {hasResult && m.result.scoreStr && (
                 <>
-                  <Dot />
-                  <span style={{ color: C.green, fontWeight: 600 }}>score</span>
+                  <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,.08)', display: 'inline-block' }} />
+                  <span style={{ color: 'rgba(76,175,80,.4)' }}>{m.result.scoreStr}</span>
                 </>
               )}
             </div>
 
-            {/* Action Grid */}
+            {/* Action Grid — 3 columns */}
             {hasResult ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                 <button onClick={() => setModal(m)} style={actionBtn('primary')}>Ver score</button>
                 <button onClick={() => deleteMatch(m.id)} style={actionBtn('danger')}>Eliminar</button>
-                <div style={{ visibility: 'hidden' }} />
+                <div />
               </div>
             ) : m.status === 'SCHEDULED' ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-                {!m.deadlineForced && (
-                  <button onClick={() => forceDeadline(m.id)} style={actionBtn('orange')}>Cerrar pronóstico</button>
-                )}
-                {m.deadlineForced && (
+                {!m.deadlineForced ? (
+                  <button onClick={() => forceDeadline(m.id)} style={actionBtn()}>Cerrar pronóstico</button>
+                ) : (
                   <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={actionBtn('primary')}>Iniciar</button>
                 )}
                 <button onClick={() => forceStart(m.id)} style={actionBtn('primary')} disabled={m.deadlineForced}>
@@ -625,18 +631,18 @@ export default function AdminPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                 <button onClick={() => setModal(m)} style={actionBtn('primary')}>Finalizar</button>
                 <button onClick={() => setLiveModal(m)} style={actionBtn('blue')}>Score en vivo</button>
-                <button onClick={() => changeStatus(m.id, 'SUSPENDED')} style={actionBtn('orange')}>Suspender</button>
+                <button onClick={() => changeStatus(m.id, 'SUSPENDED')} style={actionBtn()}>Suspender</button>
               </div>
             ) : m.status === 'SUSPENDED' ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                 <button onClick={() => changeStatus(m.id, 'IN_PLAY')} style={actionBtn('primary')}>Reanudar</button>
                 <button onClick={() => setModal(m)} style={actionBtn('primary')}>Finalizar</button>
-                <div style={{ visibility: 'hidden' }} />
+                <button onClick={() => deleteMatch(m.id)} style={actionBtn('danger')}>Eliminar</button>
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-                <div style={{ visibility: 'hidden' }} />
-                <div style={{ visibility: 'hidden' }} />
+                <div />
+                <div />
                 <button onClick={() => deleteMatch(m.id)} style={actionBtn('danger')}>Eliminar</button>
               </div>
             )}
@@ -647,23 +653,23 @@ export default function AdminPage() {
           <>
             {activePastM.length > 0 && (
               <>
-                <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,.2)', letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ width: 2, height: 10, borderRadius: 1, background: 'rgba(255,152,0,.6)', display: 'inline-block' }} />
-                  Reanudados <span style={{ color: C.white12, fontWeight: 400, letterSpacing: '.05em' }}>{activePastM.length}</span>
+                  Reanudados <span style={{ fontWeight: 400, color: 'rgba(255,255,255,.12)', letterSpacing: '.05em' }}>{activePastM.length}</span>
                 </div>
                 {renderMatchList(activePastM)}
               </>
             )}
 
-            <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,.2)', letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ width: 2, height: 10, borderRadius: 1, background: todayHasLive ? 'rgba(244,67,54,.6)' : 'rgba(255,255,255,.3)', display: 'inline-block' }} />
-              Hoy <span style={{ color: C.white12, fontWeight: 400, letterSpacing: '.05em' }}>{todayM.length}</span>
+              Hoy <span style={{ fontWeight: 400, color: 'rgba(255,255,255,.12)', letterSpacing: '.05em' }}>{todayM.length}</span>
             </div>
             {renderMatchList(todayM)}
 
-            <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,.2)', letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ width: 2, height: 10, borderRadius: 1, background: 'rgba(255,255,255,.3)', display: 'inline-block' }} />
-              Mañana <span style={{ color: C.white12, fontWeight: 400, letterSpacing: '.05em' }}>{tomorrowM.length}</span>
+              Mañana <span style={{ fontWeight: 400, color: 'rgba(255,255,255,.12)', letterSpacing: '.05em' }}>{tomorrowM.length}</span>
             </div>
             {renderMatchList(tomorrowM)}
 
@@ -680,9 +686,9 @@ export default function AdminPage() {
               }
               return (
                 <>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,.2)', letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ width: 2, height: 10, borderRadius: 1, background: 'rgba(255,255,255,.3)', display: 'inline-block' }} />
-                    Próximos días <span style={{ color: C.white12, fontWeight: 400, letterSpacing: '.05em' }}>{upcomingM.length}</span>
+                    Próximos días <span style={{ fontWeight: 400, color: 'rgba(255,255,255,.12)', letterSpacing: '.05em' }}>{upcomingM.length}</span>
                   </div>
                   {Object.entries(grouped).sort().map(([date, list]) => (
                     <div key={date} style={{ marginBottom: 20 }}>
@@ -701,8 +707,8 @@ export default function AdminPage() {
       })()}
 
       {/* Cuadro del torneo */}
-      <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ width: 2, height: 10, borderRadius: 1, background: C.white35, display: 'inline-block' }} />
+      <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,.2)', letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ width: 2, height: 10, borderRadius: 1, background: 'rgba(255,255,255,.35)', display: 'inline-block' }} />
         Cuadro del torneo
       </div>
       <div style={{ marginBottom: 24 }}>
@@ -790,8 +796,8 @@ export default function AdminPage() {
       </div>
 
       {/* Tournament result */}
-      <div style={{ fontSize: 10, fontWeight: 600, color: C.white25, letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ width: 2, height: 10, borderRadius: 1, background: C.white35, display: 'inline-block' }} />
+      <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,.2)', letterSpacing: '.1em', textTransform: 'uppercase', margin: '20px 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ width: 2, height: 10, borderRadius: 1, background: 'rgba(255,255,255,.35)', display: 'inline-block' }} />
         Resultado del torneo
       </div>
       <div style={{ marginBottom: 24, background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.06)', borderRadius: 14, padding: 16 }}>
