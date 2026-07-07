@@ -9,7 +9,6 @@ import HistorialPage from './pages/HistorialPage.jsx'
 import TorneoPage   from './pages/TorneoPage.jsx'
 import BracketPage  from './pages/BracketPage.jsx'
 import RankingPage  from './pages/RankingPage.jsx'
-import ChatPage     from './pages/ChatPage.jsx'
 import AdminPage    from './pages/AdminPage.jsx'
 import OnboardingModal from './components/OnboardingModal.jsx'
 import BottomNav    from './components/BottomNav.jsx'
@@ -44,7 +43,6 @@ function AppShell() {
           <Route path="/historial/:userId" element={<HistorialPage />} />
           <Route path="/torneo"      element={<TorneoPage />} />
           <Route path="/ranking"     element={<RankingPage />} />
-          <Route path="/chat"        element={<ChatPage />} />
           {user.role === 'ADMIN' && <Route path="/admin" element={<AdminPage />} />}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
